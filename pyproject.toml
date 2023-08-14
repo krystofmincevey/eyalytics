@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "eyalytics"
+version = "0.1.0"
+description = ""
+authors = ["krystofmincev <krystof.mincev@be.ey.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<3.9.7 || >3.9.7,<4.0"
+streamlit = "^1.23.1"
+langchain = "^0.0.212"
+openai = "^0.27.8"
+tiktoken = "^0.4.0"
+duckduckgo-search = "^3.8.3"
+python-dotenv = "^1.0.0"
+google-search-results = "^2.4.2"
+requests = "^2.31.0"
+selenium = "^4.10.0"
+beautifulsoup4 = "^4.12.2"
+PyPDF2 = "^3.0.1"
+"pdfminer.six" = "^20221105"
+
+[tool.poetry.dev-dependencies]
+ipython = "8.12"
+jupyter = "^1.0.0"
+notebook = "^6.5.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
