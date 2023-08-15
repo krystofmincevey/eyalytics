@@ -6,7 +6,6 @@ authors = ["krystofmincev <krystof.mincev@be.ey.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<3.9.7 || >3.9.7,<4.0"
-streamlit = "^1.23.1"
 langchain = "^0.0.212"
 openai = "^0.27.8"
 tiktoken = "^0.4.0"
@@ -18,6 +17,9 @@ selenium = "^4.10.0"
 beautifulsoup4 = "^4.12.2"
 PyPDF2 = "^3.0.1"
 "pdfminer.six" = "^20221105"
+pinecone-client = {extras = ["grpc"], version = "^2.2.2"}
+chromadb = "^0.4.5"
+faiss-cpu = "^1.7.4"
 
 [tool.poetry.dev-dependencies]
 ipython = "8.12"
