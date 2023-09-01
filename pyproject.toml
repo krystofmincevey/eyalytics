@@ -20,6 +20,15 @@ PyPDF2 = "^3.0.1"
 pinecone-client = {extras = ["grpc"], version = "^2.2.2"}
 chromadb = "^0.4.5"
 faiss-cpu = "^1.7.4"
+camelot-py = "^0.11.0"
+opencv-python = "^4.8.0"
+tabula = "^1.0.5"
+pdfplumber = "^0.10.2"
+pyperclip = "^1.8.2"
+tabula-py = "^2.7.0"
+webdriver-manager = "^4.0.0"
+chromedriver-autoinstaller = "^0.6.2"
+prettytable = "^3.8.0"
 
 [tool.poetry.dev-dependencies]
 ipython = "8.12"
