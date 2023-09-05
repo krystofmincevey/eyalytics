@@ -29,6 +29,9 @@ tabula-py = "^2.7.0"
 webdriver-manager = "^4.0.0"
 chromedriver-autoinstaller = "^0.6.2"
 prettytable = "^3.8.0"
+docx = "^0.2.4"
+python-docx = "^0.8.11"
+PyAutoGUI = "^0.9.54"
 
 [tool.poetry.dev-dependencies]
 ipython = "8.12"
