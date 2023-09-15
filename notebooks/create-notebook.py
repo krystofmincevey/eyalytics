@@ -4,6 +4,9 @@ Creates a minimal jupyter notebook (.ipynb)
 Usage: create-notebook <notebook>
 """
 
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 import sys
 from notebook import transutils as _
 from notebook.services.contents.filemanager import FileContentsManager as FCM
