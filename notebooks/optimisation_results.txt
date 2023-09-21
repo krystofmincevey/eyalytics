@@ -1,0 +1,142 @@
+EXPERIMENT RESULTS:
+
+EXP 1:
+
+CHUNKING STRATEGY: 
+
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=600,  # in order to be able to fit 3 chunks in context window
+    chunk_overlap=100,  
+    length_function=tiktoken_len,
+    separators=["\n\n", "\n", " ", ""]  # order in which splits are prioritized
+)
+
+RETURNS 3
+
+RESULTS:
+
+PROMPT:
+
+    What specific actions has the company taken to reduce its energy consumption in direct operations? 
+    Are there achievements listed in the report?
+    
+
+----------------------------------------
+
+CONTEXT:
+Rank: 1 | Content: TABLE SUMMARY:: The table from Coca-Cola's Sustainability Report displays data related to greenhouse gas emissions and waste. It includes information on the company's emissions reduction targets, greenhouse gas emissions from direct and indirect sources, total manufacturing emissions, emissions ratios, and energy use. The table provides data for each year from 2014 to 2022, showing the progress and changes in these metrics over time.
+RAW TABLE: {'title': 'GREENHOUSE GAS EMISSIONS & WASTE', 'col_headers': ['Year ended December 31,', '', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'], 'table': [{'Year ended December 31,': 'Reduce our absolute emissions by 25% by 2030 against a 2015 baseline', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': '7%'}, {'Year ended December 31,': 'GHG Emissions1', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Direct, from manufacturing sites (metric tons) (in millions)', '': '', '2014': '1.7', '2015': '1.7', '2016': '1.6', '2017': '1.78', '2018': '1.79', '2019': '1.83', '2020': '1.49', '2021': '1.61', '2022': '1.65'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Indirect, from electricity purchased and consumed (without energy trading) at manufacturing sites (metric tons) (in millions)', '': '', '2014': '3.6', '2015': '3.8', '2016': '3.8', '2017': '3.76', '2018': '3.76', '2019': '3.73', '2020': '3.75', '2021': '3.88', '2022': '3.91'}, {'Year ended December 31,': 'Indirect, from electricity purchased and consumed (without energy trading) at manufacturing sites (using GHG protocol market-based method)2 (metric tons) (in millions)', '': '', '2014': '', '2015': '', '2016': '', '2017': '3.44', '2018': '3.35', '2019': '3.88', '2020': '3.28', '2021': '3.56', '2022': '3.33'}, {'Year ended December 31,': 'Total, from manufacturing sites (metric tons) (in millions)', '': '', '2014': '5.55', '2015': '5.58', '2016': '5.45', '2017': '5.54', '2018': '5.55', '2019': '5.56', '2020': '5.24', '2021': '5.49', '2022': '5.56'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Total, from manufacturing sites (using GHG protocol market-based method)2 (in millions)', '': '', '2014': '', '2015': '', '2016': '', '2017': '5.22', '2018': '5.14', '2019': '5.71', '2020': '4.77', '2021': '5.18', '2022': '4.97'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Emissions Ratio (gCO2 /L)', '': '', '2014': '36.89', '2015': '36.23', '2016': '35.29', '2017': '33.96', '2018': '34.83', '2019': '34.74', '2020': '33.96', '2021': '33.33', '2022': '28.85'}, {'Year ended December 31,': 'Business & Sustainability Report and CDP Manufacturing Emissions Reconciliation', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Reported Manufacturing Emissions in Business & Sustainability Report (millions of MT CO2e)–TCCS Reporting Entity3', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Scope 1 emissions per Business & Sustainability Report', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '1.61', '2022': '1.65'}, {'Year ended December 31,': 'Scope 2 emissions per Business & Sustainability Report', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '3.88', '2022': '3.91'}, {'Year ended December 31,': 'Total manufacturing emissions per Business & Sustainability Report', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '5.49', '2022': '5.56'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Reported Manufacturing Emissions in CDP (MT CO2e)–TCCC Reporting Entity3, 4', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Scope 1–Manufacturing per CDP C7.3c', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '325,833', '2022': '304,144'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Scope 2 (location-based)–Manufacturing per CDP C6.3', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '869,832', '2022': '890,400'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Scope 3–Franchises per CDP C6.5', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '4,299,247', '2022': '4,363,071'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Total manufacturing emissions per CDP', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '5,494,912', '2022': '5,577,615'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Total manufacturing emissions per CDP (in millions)', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '5.49', '2022': '5.56'}, {'Year ended December 31,': 'Energy Use5', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Total Energy Use (megajoules) (in millions)', '': '', '2014': '61,764.0', '2015': '61,037.4', '2016': '61,558.7', '2017': '59,070.9', '2018': '61,464.0', '2019': '62,419.9', '2020': '58,888.1', '2021': '63,735.8', '2022': '65,389'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '11,758.9', '2020': '10,985.2', '2021': '12,731.5', '2022': '10,680'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Percentage renewable (electricity)', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '15%', '2020': '17%', '2021': '12%', '2022': '21%'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': 'Energy Use Ratio (megajoules per liter of product)', '': '', '2014': '0.42', '2015': '0.41', '2016': '0.40', '2017': '0.40', '2018': '0.39', '2019': '0.39', '2020': '0.38', '2021': '0.39', '2022': '0.38'}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '', '2020': '', '2021': '', '2022': ''}, {'Year ended December 31,': '', '': '', '2014': '', '2015': '', '2016': '', '2017': '', '2018': '', '2019': '0.54', '2020': '0.58', '2021': '0.61', '2022': '0.57'}]} | Metadata: Coca-Cola Sustainability Report (2022)
+
+Rank: 2 | Content: we are reducing the Coca-Cola system’s greenhouse gas (GHG) emissions and building resilience in our business, value chain and local communities.
+
+THE COCA-COLA COMPANY 2022 BUSINESS & SUSTAINABILITY REPORT	43
+
+We are working to reduce our carbon footprint in line with science to avoid the worst impacts of climate change.
+
+We do this by analyzing and prioritizing the sources of GHG emissions across our value chain and by partnering with stakeholders to drive down those emissions.
+
+As of 2022, we reduced our emissions across Scopes 1, 2 and 3 by 7%,1 making progress toward our science-based reduction target of 25% by 2030 against a 2015 baseline1. Our ambition is
+
+to achieve net zero emissions by 2050. Several of our bottling partners have announced
+
+their own science-based targets and net zero pledges to drive climate action across the global Coca-Cola system.
+
+In 2022, our scope 1 emissions were 4.4 million metric tons, scope 2 emissions were 3.5 million metric tons2 and scope 3 emissions were 57.0 million metric tons.
+
+CLIMATE CHANGE GOVERNANCE
+
+The   of our Board of Directors oversees climate-related issues. The Committee assists our Board in overseeing the company’s environmental, social, legislative, regulatory and public policy matters, including progress against
+
+our science-based emissions reduction target. The committee reports regularly to the full Board on these and other matters.
+
+To learn more about our governance structure, see the  section. For more on climate- related governance, see our  , Section C1.
+
+This figure was calculated using the market-based emissions method and therefore includes purchased renewable electricity as part of the system’s overall emissions reduction. For exclusions, please see the criteria statement in the .
+
+This figure was calculated using the market-based emissions method and therefore includes purchased renewable electricity.
+
+Taking Action Across Our Value Chain
+
+MANAGING CLIMATE RISK
+
+Our Risk Steering Committee oversees regular system-wide risk assessments. We integrate climate risk planning into this cross-functional and cross-company Enterprise Risk Management (ERM) process. We regularly evaluate commodity- specific risks and resilience associated with climate impacts on water and our supply chain.
+
+Risks that could materially affect our business, financial condition and results of operations are disclosed in the company's   for the year ended December 31,
+
+2022. This includes risks related to the effects of climate change and legal or regulatory initiatives to address climate change. Our management team works to mitigate these risks through, among other things, business continuity planning, setting targets that drive efficiency and making investments to improve our performance and increase resilience. Ultimately, the Corporate Governance and Sustainability Committee of our Board of Directors oversees climate-related risks. | Metadata: Coca-Cola Sustainability Report (2022)
+
+Rank: 3 | Content: TABLE SUMMARY:: The table displays the goals and current status of Coca-Cola's bottling partners and suppliers in reducing greenhouse gas (GHG) emissions. The goal is to reduce absolute GHG emissions by 25% by 2030, against a 2015 baseline. The current status for 2022 shows a 7% reduction in GHG emissions.
+RAW TABLE: {'title': 'Several of our bottling partners and suppliers have set or committed to setting their own science-based reduction targets to drive climate action across our value chain.', 'col_headers': ['GOAL', '2022 STATUS', '2022 STATUS'], 'table': [{'GOAL': 'Reduce absolute', '2022 STATUS': ''}, {'GOAL': 'greenhouse gas (GHG) emissions by 25% by', '2022 STATUS': '7%'}, {'GOAL': '2030, against a 2015', '2022 STATUS': ''}, {'GOAL': 'baseline', '2022 STATUS': ''}]} | Metadata: Coca-Cola Sustainability Report (2022)
+
+Contextual information sorted from most relevant to least relevant.
+
+
+
+
+ATTEMPT 2:
+
+300 token window 30 token overlap.
+
+RETURN 4
+
+PROMPT:
+
+    What specific actions has the company taken to reduce its energy consumption in direct operations? 
+    Are there achievements listed in the report?
+    
+
+----------------------------------------
+
+CONTEXT:
+Rank: 1 | Content: In three selected water catchment areas in Peru, South Africa and Spain, our aim is to reduce water consumption for growing fruit and vegetables to best-practice levels. We spent last year mapping how to collect data to monitor water consumption in these areas.
+
+We want to implement independent audits or water standards for 70% of the volume of fruit and vegetables coming from high-water-risk countries.
+
+Read more about the SIFAV sector initiative on p. 169.
+
+Avoiding and reducing energy consumption
+
+With the help of our energy reduction plan, we intend to reduce the energy consumption of our activities in Belgium and Luxembourg by 20% by 2030 compared to base year 2009, relative to our – continuously growing – revenue. Our reduction plan provides for a structural approach to the largest energy consumers: heating, cooling, lighting and mobility.
+
+By 2030, we consume 20% less energy than in 2009, relative to our revenue.
+
+By 2022, we were already consuming 10,4% less energy (normalised).
+
+Raising awareness
+
+Through campaigns focusing on energy-saving, we are raising our employees’ awareness to the fact that they too can contribute to reducing energy consumption through their behaviour. We focus on simple actions that make a difference, such as keeping doors closed, de-icing freezers or turning off lights.
+
+Heating | Metadata: Colruyt_Group Annual report with sustainability (2022)
+
+Rank: 2 | Content: <<F60>>: Text: Colruyt_Group's scope 1 and 2 action plans focus on three decarbonization levers: cooling, heating, and mobility, which are the main sources of greenhouse gas emissions. Their goal is to reduce emissions by 42% by 2030. | Metadata: Colruyt_Group Annual report with sustainability (2022)
+
+Rank: 3 | Content: TABLE SUMMARY:: The table from Colruyt_Group's Annual report with sustainability (2022) displays indicators related to the water consumption of all sites in Belgium managed by Colruyt Group Technics. The table has five columns, all titled "Avoiding and reducing energy consumption." The values in the table represent the water consumption in different units. The first row shows a value of 606.013, the second row shows a value of 556.281, the third row shows a value of 58.5, and the fourth row shows a value of 57.9. It is important to note that the table does not include drinking water for sales. The purpose of this table is to provide an overview of the efforts made by Colruyt Group Technics in avoiding and reducing water consumption across their sites in Belgium.
+RAW TABLE: {'title': 'These indicators relate to the water consumption of all sites in Belgium managed by Colruyt Group Technics. Drinking water for sales is not included.', 'col_headers': ['Avoiding and reducing energy consumption', 'Avoiding and reducing energy consumption', 'Avoiding and reducing energy consumption', 'Avoiding and reducing energy consumption', 'Avoiding and reducing energy consumption'], 'table': [{'Avoiding and reducing energy consumption': '606.013'}, {'Avoiding and reducing energy consumption': '556.281'}, {'Avoiding and reducing energy consumption': '58,5'}, {'Avoiding and reducing energy consumption': '57,9'}]} | Metadata: Colruyt_Group Annual report with sustainability (2022)
+
+Rank: 4 | Content: Employees can specify many preferences for their work schedules, work a maximum of one Sunday every two months and can work from home or regionally up to three days a week.
+
+Even in the middle of the energy crisis, the contact centre remained easily accessible for questions about energy supplier DATS 24.
+
+Cost reductions
+
+The IT department contributed to improving the cost structure at group level.
+
+Creative interventions have enabled a number of investments planned for the past and next financial year to be postponed to a later date. In addition, the scope of a number of projects was reduced to the essentials, without any direct impact on day-to-day operations.
+
+The software licences and the number of accesses have been reviewed to match real needs.
+
+The mainframes were sold in order to bring back the latest new mainframe version via lease.
+
+Reduction of the number of consultants in Belgium. Expansion of activities in India and more facilities for homeworking.
+
+Together with sheltered workshops
+
+In the past financial year, IT also called on a sheltered workshop for delivering large volumes of new and recovered IT material.
+
+20.000 new IT devices unpacked, labelled and registered.
+
+21.000 cables sorted and tested, of which IT was able to recover 15.000 for reuse.
+
+65.000 Colruyt electronic price labels checked, more than 60% of which came back into circulation. | Metadata: Colruyt_Group Annual report with sustainability (2022)
+
+Contextual information sorted from most relevant to least relevant.
