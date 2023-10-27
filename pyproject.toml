@@ -33,6 +33,8 @@ docx = "^0.2.4"
 python-docx = "^0.8.11"
 PyAutoGUI = "^0.9.54"
 docx2python = "^2.7.3"
+slate3k = "^0.5.3"
+fitz = "^0.0.1-alpha.2"
 
 [tool.poetry.dev-dependencies]
 ipython = "8.12"
