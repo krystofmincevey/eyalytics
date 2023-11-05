@@ -35,6 +35,7 @@ PyAutoGUI = "^0.9.54"
 docx2python = "^2.7.3"
 slate3k = "^0.5.3"
 fitz = "^0.0.1-alpha.2"
+streamlit = "^1.28.1"
 
 [tool.poetry.dev-dependencies]
 ipython = "8.12"

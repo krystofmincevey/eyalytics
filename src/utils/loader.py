@@ -1,17 +1,16 @@
 import os
 import re
-import fitz
 import camelot
 import tabula
 import PyPDF2
 import pdfplumber
 import slate3k as slate
 import docx
-import docx2python
 
-from typing import List
+from typing import List, Dict
 from tqdm.auto import tqdm
 from pdfminer.high_level import extract_text
+from docx2python import docx2python
 
 
 PYPDF2_KEY = 'pypdf2'
@@ -20,10 +19,11 @@ CAMELOT_KEY = 'camelot'
 TABULA_KEY = 'tabula'
 PLUMBER_KEY = 'plumber'
 TIKA_KEY = 'tika'
-FITZ_KEY = 'fitz'
 MINER_KEY = 'miner'
 REGEX_KEY = 'regex'
 OCR_KEY = 'ocr'
+DOXC_KEY = 'doxc'
+DOXC2PYTHON_KEY = 'doxc2python'
 FIGURE_THRESHOLD = 0.1
 EPSILON = 1e-10
 REPEAT_THRESHOLD = 4
@@ -72,7 +72,8 @@ def process_footnotes(text, footnotes):
 
     # New addition: replace footnotes appearing directly after words or at the end of sentences
     for idx, footnote in enumerate(footnotes, 1):
-        # This regex will look for a number that doesn't have another number directly before it (to differentiate from normal numbers within the text)
+        # This regex will look for a number that doesn't have another number directly before
+        # it (to differentiate from normal numbers within the text)
         pattern = r'(?<![0-9])' + str(idx) + r'(?![0-9])'
         replacement = "[{}]".format(footnote)
         text = re.sub(pattern, replacement, text)
@@ -124,20 +125,25 @@ def repeated_artifact_check(line, artifact_dict):
     return False
 
 
-class Loader(object):
+def _is_empty(text):
+    return len(text) == 0
 
-    def __init__(self, file_path, dir_path=):
-        self._path = None  # Initialize _path to None
-        self.path = os.path.join(dir_path, file_path)
+
+class Loader(object):
 
     TEXT_LOADERS = {}
     TABLE_LOADERS = {}
+    FIGURE_LOADERS = {}
+
+    def __init__(self, file_path: str, dir_path: str):
+        self._path = None  # Initialize _path to None
+        self.path = os.path.join(dir_path, file_path)
 
     def load_tables(self, key: str):
 
         if key not in self.TABLE_LOADERS.keys():
             raise KeyError(
-                f"The following loaders: {[self.TABLE_LOADERS.keys()]} are supported. "
+                f"The following table loaders: {[self.TABLE_LOADERS.keys()]} are supported. "
                 f"Not {key}"
             )
 
@@ -147,13 +153,24 @@ class Loader(object):
 
         if key not in self.TEXT_LOADERS.keys():
             raise KeyError(
-                f"The following loaders: {[self.TEXT_LOADERS.keys()]} are supported. "
+                f"The following text loaders: {[self.TEXT_LOADERS.keys()]} are supported. "
                 f"Not {key}"
             )
 
         return self.TEXT_LOADERS[key](self.path)
 
+    def load_figure(self, key: str):
 
+        if key not in self.FIGURE_LOADERS.keys():
+            raise KeyError(
+                f"The following figure loaders: {[self.FIGURE_LOADERS.keys()]} are supported. "
+                f"Not {key}"
+            )
+
+        return self.FIGURE_LOADERS[key](self.path)
+
+
+# TODO: Finalise, text, table, and figure loaders
 class DOXCLoader(Loader):
 
     def __init__(self, file_path, dir_path='./data/doxc_db'):
@@ -176,7 +193,102 @@ class DOXCLoader(Loader):
 
         self._path = new_path
 
-    def load_docx(
+    def docx2python_text_loader(self) -> List[str]:
+        """
+        Extract text from a .doxc file using docx2python.
+        :return: A list of strings, where each string represents a block of text.
+        """
+        # Extract the .doxc content
+        docx_content = docx2python(self.path)
+        text_content = []
+
+        # docx2python represents the docx as a list of lists.
+        # You navigate through these to find paragraphs.
+        # Iterate through the body (ignores headers, footers)
+        for docx_part in docx_content.body:
+            for table in docx_part:
+                for row in table:
+                    for cell in row:
+                        # strip() removes whitespace at the beginning and end of the text
+                        processed_text = cell.text.strip()
+                        if processed_text:  # ignore empty strings
+                            text_content.append(processed_text)
+
+        return text_content
+
+    def doxc_text_loader(self) -> List[str]:
+        """
+        Extract text from a .doxc file.
+        :return: A list of strings, where each string represents a block of text.
+        """
+        doc = docx.Document(self.path)
+        text_content = []
+        for paragraph in doc.paragraphs:
+            processed_text = paragraph.text.strip()
+            if not _is_empty(processed_text):
+                text_content.append(processed_text)
+        return text_content
+
+    def doxc_fig_loader(self) -> List[Dict]:
+        """
+        Extract figures from a .doxc file.
+        :return: A list of dicts, each containing the title and data of a figure.
+        """
+        doc = docx.Document(self.path)
+        figures = []
+        figure_data_group = {'title': None, 'data': []}
+        previous_text = None
+
+        for paragraph in doc.paragraphs:
+            processed_text = paragraph.text.strip()
+            if not _is_empty(processed_text):
+                current_is_figure_data = is_potential_figure_data(processed_text)
+                if current_is_figure_data:
+                    if not figure_data_group['title']:
+                        figure_data_group['title'] = previous_text
+                    figure_data_group['data'].append(processed_text)
+                else:
+                    if figure_data_group['data']:
+                        figures.append(figure_data_group)
+                        figure_data_group = {'title': None, 'data': []}
+                previous_text = processed_text
+        return figures
+
+    def doxc_table_loader(self) -> List[Dict]:
+        """
+        Extract tables from a .doxc file.
+        :return: A list of dicts, each containing the title, column headers, and rows of a table.
+        """
+        doc = docx.Document(self.path)
+        tables = []
+        previous_text = None
+
+        for table in doc.tables:
+            headers = [cell.text.strip() for cell in table.rows[0].cells]
+            rows = []
+
+            for row in table.rows[1:]:
+                row_data = {headers[j]: cell.text.strip() for j, cell in enumerate(row.cells)}
+                rows.append(row_data)
+
+            tables.append({
+                'title': previous_text,
+                'col_headers': headers,
+                TABLE_ROWS_KEY: rows
+            })
+
+            # Reset the previous_text if the title was just used
+            previous_text = None
+
+            # Update the previous_text with the last cell's text of the last row if it's not empty
+            if rows and rows[-1]:
+                last_cell_text = list(rows[-1].values())[-1]
+                if last_cell_text.strip():
+                    previous_text = last_cell_text
+
+        return tables
+
+    def doxc_load_all(
             self,
     ) -> dict:
 
@@ -215,7 +327,6 @@ class DOXCLoader(Loader):
                 processed_text = current_para.text.strip()
                 # Ignore empty lines or repeated lines
                 if _is_empty(processed_text) or repeated_artifact_check(processed_text, artifact_dict):
-                    current_para = None
                     continue
                 try:
                     next_text = next_para.text
@@ -282,6 +393,17 @@ class DOXCLoader(Loader):
 
         return result
 
+    TEXT_LOADERS = {
+        DOXC_KEY: doxc_text_loader,
+        DOXC2PYTHON_KEY: docx2python_text_loader,
+    }
+    TABLE_LOADERS = {
+        DOXC_KEY: doxc_table_loader,
+    }
+    FIGURE_LOADERS = {
+        DOXC_KEY: doxc_fig_loader,
+    }
+
 
 class PDFLoader(Loader):
 
@@ -306,7 +428,7 @@ class PDFLoader(Loader):
         self._path = new_path
 
     @staticmethod
-    def pypdf2_loader(file_path: str) -> List[str]:
+    def pypdf2_text_loader(file_path: str) -> List[str]:
         """
         Extract text from a PDF file using PyPDF2.
 
@@ -322,7 +444,7 @@ class PDFLoader(Loader):
         return text_content
 
     @staticmethod
-    def pdfminer_loader(file_path: str) -> List[str]:
+    def pdfminer_text_loader(file_path: str) -> List[str]:
         """
         Extract text from a PDF file using pdfminer.
 
@@ -333,7 +455,7 @@ class PDFLoader(Loader):
         return text_content.split('\n')  # Splitting by newline to get a list of lines
 
     @staticmethod
-    def slate_loader(file_path) -> List[str]:
+    def slate_text_loader(file_path) -> List[str]:
         """
         Extract text from a PDF file using slate.
 
@@ -347,21 +469,7 @@ class PDFLoader(Loader):
         return text_content
 
     @staticmethod
-    def pymupdf_text_loader(file_path) -> List[str]:
-        """
-        Extract text from a PDF file using PyMuPDF.
-
-        :param file_path: The path to the PDF file.
-        :return: A list of strings, where each string represents a line of text.
-        """
-        doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            text += page.get_text()
-        return text.split('\n')
-
-    @staticmethod
-    def regex_loader(file_path) -> List[str]:
+    def regex_table_loader(file_path) -> List[str]:
         """
         Extract tables from a PDF file using regular expressions.
 
@@ -389,7 +497,7 @@ class PDFLoader(Loader):
         return text_content
 
     @staticmethod
-    def pdfplumber_loader(file_path) -> List[str]:
+    def pdfplumber_table_loader(file_path) -> List[str]:
         """
         Extract tables from a PDF file using pdfplumber.
 
@@ -411,7 +519,7 @@ class PDFLoader(Loader):
         return result
 
     @staticmethod
-    def enhanced_pypdf2_loader(file_path) -> List[str]:
+    def pypdf2_table_loader(file_path) -> List[str]:
         """
         Extract text and tables from a PDF file using an enhanced version of PyPDF2.
 
@@ -466,7 +574,7 @@ class PDFLoader(Loader):
         return result
 
     @staticmethod
-    def camelot_loader(file_path: str) -> List[str]:
+    def camelot_table_loader(file_path: str) -> List[str]:
         """
         Extract tables from a PDF file using Camelot.
 
@@ -482,7 +590,7 @@ class PDFLoader(Loader):
         return result
 
     @staticmethod
-    def tabula_loader(file_path: str) -> List[str]:
+    def tabula_table_loader(file_path: str) -> List[str]:
         """
         Extract tables from a PDF file using Tabula.
 
@@ -502,19 +610,18 @@ class PDFLoader(Loader):
         raise NotImplementedError
 
     TEXT_LOADERS = {
-        PYPDF2_KEY: PDFLoader.pypdf2_loader,
-        SLATE_KEY: PDFLoader.slate_loader,
-        PLUMBER_KEY: PDFLoader.pdfplumber_text_loader,
-        MINER_KEY: PDFLoader.pdfminer_loader,
-        FITZ_KEY: PDFLoader.pymupdf_text_loader,
+        PYPDF2_KEY: pypdf2_text_loader,
+        SLATE_KEY: slate_text_loader,
+        PLUMBER_KEY: pdfplumber_text_loader,
+        MINER_KEY: pdfminer_text_loader,
     }
 
     # TODO: Consider LayoutLM (by Microsoft)
     TABLE_LOADERS = {
-        CAMELOT_KEY: PDFLoader.camelot_loader,
-        TABULA_KEY: PDFLoader.tabula_loader,
-        PYPDF2_KEY: PDFLoader.enhanced_pypdf2_loader,
-        PLUMBER_KEY: PDFLoader.pdfplumber_loader,
-        REGEX_KEY: PDFLoader.regex_loader,
-        OCR_KEY: PDFLoader.ocr_loader,
+        CAMELOT_KEY: camelot_table_loader,
+        TABULA_KEY: tabula_table_loader,
+        PYPDF2_KEY: pypdf2_table_loader,
+        PLUMBER_KEY: pdfplumber_table_loader,
+        REGEX_KEY: regex_table_loader,
+        OCR_KEY: ocr_loader,
     }
