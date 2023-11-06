@@ -2977,6 +2977,17 @@ watchdog = {version = ">=2.1.5", markers = "platform_system != \"Darwin\""}
 snowflake = ["snowflake-snowpark-python (>=0.9.0)", "snowflake-connector-python (>=2.8.0)"]
 
 [[package]]
+name = "streamlit-chat"
+version = "0.1.1"
+description = "A streamlit component, to make chatbots"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+streamlit = ">=0.63"
+
+[[package]]
 name = "sympy"
 version = "1.12"
 description = "Computer algebra system (CAS) in Python"
@@ -3461,7 +3472,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8.1,<3.9.7 || >3.9.7,<4.0"
-content-hash = "680bb5fe4cc92996f641c7c03e19671e97acc36f0e42e0cdcf123425a6c9b37e"
+content-hash = "ba5880fc9e6aa30910e7f9221cdddabf55c24c7c2a4236f9cbdf70667f5d95cc"
 
 [metadata.files]
 aiofiles = [
@@ -5887,6 +5898,10 @@ starlette = [
 streamlit = [
     {file = "streamlit-1.28.1-py2.py3-none-any.whl", hash = "sha256:f41c4e590299279a910c6a874aabc1428eda074c5f9d944403d2e192fce2ebb0"},
     {file = "streamlit-1.28.1.tar.gz", hash = "sha256:cca04f6d95b14b7bc37f0cabaf27504b86af6b4e1af98d73acc80ecdcfbcc492"},
+]
+streamlit-chat = [
+    {file = "streamlit-chat-0.1.1.tar.gz", hash = "sha256:e5911c8e3d5bbdd444782a0eb46a5f0cf24247124eb165bcc2e759540767ac3c"},
+    {file = "streamlit_chat-0.1.1-py3-none-any.whl", hash = "sha256:bec918a6ff9d24fbc842d5a0e7c492e30e1ef71c3a72b94b0cb4be1a7300881e"},
 ]
 sympy = [
     {file = "sympy-1.12-py3-none-any.whl", hash = "sha256:c3588cd4295d0c0f603d0f2ae780587e64e2efeedb3521e46b9bb1d08d184fa5"},

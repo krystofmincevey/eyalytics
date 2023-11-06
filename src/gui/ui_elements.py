@@ -24,50 +24,45 @@ def display_dataset(dataset_key):
     st.header("Dataset Preview")
     dataset = st.session_state[dataset_key]
 
-    if not dataset.empty:
-        # Check if the filters state exists; if not, initialize it
-        if 'filters' not in st.session_state:
-            st.session_state['filters'] = {}
+    # Check if the filters state exists; if not, initialize it
+    if 'filter_column' not in st.session_state:
+        st.session_state['filter_column'] = None
+    if 'filter_value' not in st.session_state:
+        st.session_state['filter_value'] = None
 
-        # Reset filters if a new dataset is loaded
-        if 'last_dataset' not in st.session_state or st.session_state['last_dataset'] != dataset_key:
-            st.session_state['last_dataset'] = dataset_key
-            st.session_state['filters'] = {}
+    # Reset filters if a new dataset is loaded
+    if 'last_dataset' not in st.session_state or st.session_state['last_dataset'] != dataset_key:
+        st.session_state['last_dataset'] = dataset_key
+        st.session_state['filter_column'] = None
+        st.session_state['filter_value'] = None
 
-        # Dynamically create filters based on dataset columns
-        for col in dataset.columns:
-            # Skip if the column has too many unique values
-            if len(dataset[col].unique()) > 50:
-                continue
+    # Dropdown to select a column
+    col_options = [''] + list(dataset.columns)
+    selected_column = st.selectbox("Select a column to filter by:", col_options, index=0, key=f"{dataset_key}_select_column")
 
-            # Create a unique key for the multiselect widget
-            filter_key = f"{dataset_key}_filter_{col}"
+    # Save the selected column to the session state
+    st.session_state['filter_column'] = selected_column
 
-            # Check if a filter already exists in the session state
-            default_value = st.session_state['filters'].get(filter_key, [])
+    if selected_column:
+        # Dropdown to select unique values from the column
+        unique_values = [''] + list(dataset[selected_column].dropna().unique())
+        selected_value = st.selectbox(f"Select a value from {selected_column}:", unique_values, index=0, key=f"{dataset_key}_select_value")
 
-            # Define the multiselect filter
-            selected = st.multiselect(
-                f"Filter by {col}",
-                options=dataset[col].unique(),
-                default=default_value,
-                key=filter_key
-            )
+        # Save the selected value to the session state
+        st.session_state['filter_value'] = selected_value
 
-            # Save the selected filter values to the session state
-            st.session_state['filters'][filter_key] = selected
+        if selected_value:
+            # Filter the dataset based on selected value
+            filtered_data = dataset[dataset[selected_column] == selected_value]
+        else:
+            # If no value is selected, display unfiltered data
+            filtered_data = dataset
+    else:
+        # If no column is selected, display unfiltered data
+        filtered_data = dataset
 
-        # Filter the dataset based on selected filter values
-        filtered_data = dataset.copy()
-        for col in dataset.columns:
-            filter_key = f"{dataset_key}_filter_{col}"
-            if filter_key in st.session_state['filters']:
-                selected_values = st.session_state['filters'][filter_key]
-                if selected_values:
-                    filtered_data = filtered_data[filtered_data[col].isin(selected_values)]
-
-        # Display the filtered dataset
-        st.dataframe(filtered_data)
+    # Display the filtered dataset
+    st.dataframe(filtered_data, height=300)
 
 
 def chat_interface():
