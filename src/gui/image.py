@@ -1,6 +1,14 @@
 import base64
 import streamlit as st
 
+from PIL import Image
+
+
+# Function to set the logo in the sidebar
+def set_logo(logo_path):
+    logo = Image.open(logo_path)
+    st.sidebar.image(logo, use_column_width=True)
+
 
 # Function to set the background image
 def set_background_image(image_path):

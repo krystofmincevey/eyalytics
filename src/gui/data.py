@@ -1,18 +1,60 @@
+import pandas as pd
 import streamlit as st
-from .data_loader import load_data
 
 
-def render_dataset_buttons(data_url_1, data_url_2):
-    st.header("Datasets")
-    if st.button('Load Dataset 1'):
-        dataset = load_data(data_url_1)
-        st.session_state['dataset'] = dataset
-        st.session_state['chat_log'] = []
+# TODO: For industrialised version make sure these are stored securely!
+# Dataset URLs and their headers
+SALYTICS_KEY = 'ESG'
+MIFID_KEY = 'MIFID'
+EMISSIONS_KEY = 'Emissions'
 
-    if st.button('Load Dataset 2'):
-        dataset = load_data(data_url_2)
-        st.session_state['dataset'] = dataset
-        st.session_state['chat_log'] = []
+ADMIN_DATASETS = [
+    SALYTICS_KEY, MIFID_KEY, EMISSIONS_KEY
+]  # Admin sees all datasets
+GUEST_DATASETS = [EMISSIONS_KEY, MIFID_KEY]  # Guests see only these datasets
+
+PATHS = {
+    SALYTICS_KEY: "./data/cwyod/titanic.csv",
+    MIFID_KEY: "./data/cwyod/titanic.csv",
+    EMISSIONS_KEY: "./data/cwyod/titanic.csv",
+}
+INFO = {
+    SALYTICS_KEY: "ESG Corporate KPIs: Key Performance Indicators from Sustainalytics for corporate environmental, social, and governance metrics.",
+    MIFID_KEY: "MiFID Sustainability Data: Corporate sustainability insights as per the Markets in Financial Instruments Directive.",
+    EMISSIONS_KEY: "Client Emissions Data: Measures of Belfius clients' financed emissions.",
+}
+
+# Define which datasets are allowed for each type of user
+ADMIN_USERS = ['admin']
+
+
+def init_data_states():
+    if 'dataset' not in st.session_state:
+        st.session_state['dataset'] = pd.DataFrame()
+        st.session_state['dataset_info'] = ""
+
+
+# Now update the dataset_selection_buttons function to check the session state
+def dataset_selection_buttons(allowed_datasets):
+    for name in allowed_datasets:
+        button_key = f'button_{name}'
+        if st.sidebar.button(
+                name, key=button_key,
+                use_container_width=True,
+                type='primary',
+        ):
+            url, info = PATHS[name], INFO[name]
+            dataset = load_data(url)
+            st.session_state['dataset_info'] = info
+            st.session_state['dataset'] = dataset
+            st.session_state['chat_log'] = []
+            st.experimental_rerun()
+
+
+@st.cache_data
+def load_data(url):
+    data = pd.read_csv(url)
+    return data
 
 
 def display_dataset(dataset_key):
@@ -63,15 +105,3 @@ def display_dataset(dataset_key):
 
     # Display the filtered dataset
     st.dataframe(filtered_data, height=300)
-
-
-def chat_interface():
-    st.header("Chat Interface")
-    user_question = st.text_input("Ask a question about the data:")
-    return user_question
-
-
-def display_chat_log(chat_log):
-    for question, answer in chat_log:
-        st.text_area("Q:", value=question, height=50, disabled=True)
-        st.text_area("A:", value=answer, height=100, disabled=True)

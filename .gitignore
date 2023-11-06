@@ -1,3 +1,5 @@
 # api keys
 .env
 .DS_Store
+*.csv
+*.xlsx
