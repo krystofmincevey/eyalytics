@@ -57,14 +57,14 @@ def load_data(url):
     return data
 
 
-def display_dataset(dataset_key):
-    if dataset_key not in st.session_state or st.session_state[dataset_key].empty:
+def display_dataset():  # why are we passing the "dataset" to the function when the key doesn't change.
+    if "dataset" not in st.session_state or st.session_state["dataset"].empty:
         # If the dataset isn't in the session state or is empty, don't proceed
         st.warning("No dataset loaded or dataset is empty.")
         return
 
     st.header("Dataset Preview")
-    dataset = st.session_state[dataset_key]
+    dataset = st.session_state["dataset"]
 
     # Check if the filters state exists; if not, initialize it
     if 'filter_column' not in st.session_state:
@@ -73,14 +73,19 @@ def display_dataset(dataset_key):
         st.session_state['filter_value'] = None
 
     # Reset filters if a new dataset is loaded
-    if 'last_dataset' not in st.session_state or st.session_state['last_dataset'] != dataset_key:
-        st.session_state['last_dataset'] = dataset_key
+    if 'last_dataset' not in st.session_state or st.session_state['last_dataset'] != "dataset":
+        st.session_state['last_dataset'] = "dataset"
         st.session_state['filter_column'] = None
         st.session_state['filter_value'] = None
 
     # Dropdown to select a column
     col_options = [''] + list(dataset.columns)
-    selected_column = st.selectbox("Select a column to filter by:", col_options, index=0, key=f"{dataset_key}_select_column")
+    selected_column = st.selectbox(
+        "Select a column to filter by:",
+        col_options,
+        index=0,
+        key=f"dataset_select_column"
+    )
 
     # Save the selected column to the session state
     st.session_state['filter_column'] = selected_column
@@ -88,7 +93,11 @@ def display_dataset(dataset_key):
     if selected_column:
         # Dropdown to select unique values from the column
         unique_values = [''] + list(dataset[selected_column].dropna().unique())
-        selected_value = st.selectbox(f"Select a value from {selected_column}:", unique_values, index=0, key=f"{dataset_key}_select_value")
+        selected_value = st.selectbox(
+            f"Select a value from {selected_column}:",
+            unique_values, index=0,
+            key=f"dataset_select_value"
+        )
 
         # Save the selected value to the session state
         st.session_state['filter_value'] = selected_value
@@ -105,3 +114,9 @@ def display_dataset(dataset_key):
 
     # Display the filtered dataset
     st.dataframe(filtered_data, height=300)
+
+    with st.expander("Dataset Information"):
+        st.markdown(
+            f'<p class="big-font">{st.session_state.get("dataset_info", "No additional information available.")}</p>',
+            unsafe_allow_html=True
+        )
