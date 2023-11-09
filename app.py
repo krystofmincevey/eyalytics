@@ -5,9 +5,13 @@ from src.gui.data import (
     init_data_states, ADMIN_USERS,
     ADMIN_DATASETS, GUEST_DATASETS
 )
-from src.gui.chat import (
-    init_chatbot_session_state, chat_interface,
-    conversational_chat, display_chat_log
+# from src.gui.chat import (
+#     init_chatbot_session_state, chat_interface,
+#     conversational_chat, display_chat_log, setup_sidebar
+# )
+from src.gui.chat_agent import (
+    init_agent_session_state, chat_interface,
+    run_agent, display_chat_log, setup_sidebar
 )
 from src.gui.image import (
     set_background_image, get_image_base64,
@@ -48,7 +52,8 @@ h1, h2, h3, h4, h5, h6, .stMarkdown {
 
 # Initialize session state variables
 init_data_states()
-init_chatbot_session_state()
+#init_chatbot_session_state()
+init_agent_session_state()
 
 # BACKGROUND --------------------------------------------------
 # Set the background image
@@ -87,7 +92,7 @@ custom_title = """
     font-size: 60px;
     font-weight: bold;
     color: white; /* Belfius red */
-    text-shadow: 
+    text-shadow:
         2px 2px 2px #555; /* subtle shadow for depth */
     font-family: 'Open Sans', sans-serif; /* sleek, modern font */
     text-align: center; /* Center aligns the text */
@@ -113,8 +118,14 @@ if 'dataset' in st.session_state and not st.session_state['dataset'].empty:
 # if user_question:
 #     ai_response = conversational_chat(user_question, st.session_state['chat_chain'])
 #     st.session_state['chat_log'].append((user_question, ai_response))
-#
+
 # # Display the chat log
 # display_chat_log()
 
+setup_sidebar()
+user_question = chat_interface()
+if user_question:
+    ai_response = run_agent(user_question, st.session_state['pandas_agent'])
+    st.session_state['chat_log'].append((user_question, ai_response))
 
+display_chat_log()
