@@ -20,7 +20,7 @@ def init_chatbot_session_state():
 def init_chat_chain(csv_file_path, api_key):
     loader = CSVLoader(file_path=csv_file_path, encoding="utf-8")
     data = loader.load()
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     vectors = FAISS.from_documents(data, embeddings)
     return ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(temperature=0.0, model_name='gpt-3.5-turbo', openai_api_key=api_key),
