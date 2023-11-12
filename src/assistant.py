@@ -1,3 +1,11 @@
+"""
+USEFUL LINKS:
+https://www.youtube.com/watch?v=XvIgEY0I-Xg
+https://mer.vin/2023/11/openai-assistants-api-code-interpreter/
+https://mer.vin/2023/11/openai-assistants-api-function-calling/
+https://medium.com/@odhitom09/communicate-with-your-csv-a-guide-to-data-visualization-with-langchain-and-streamlit-fca271a8591c
+https://medium.com/prompt-engineering/unleashing-the-power-of-openais-new-gpt-assistants-with-streamlit-83779294629f
+"""
 import os
 
 from pathlib import Path
@@ -102,6 +110,7 @@ while True:
         thread_id=thread.id
     )
     print(messages)
+    print(len(messages))
     # content = client.files.retrieve_content(file.id)
 
     print(
