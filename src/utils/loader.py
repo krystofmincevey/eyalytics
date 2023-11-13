@@ -41,6 +41,12 @@ TABLE_ROWS_KEY = "table"
 TEXT_KEY = "text"
 
 
+def read_txt(filename: str):
+    with open(filename, 'r') as f:
+        contents = f.read()
+    return contents
+
+
 def extract_footnotes_from_para(para, next_para=None):
     """Extract footnote references and actual footnotes from a paragraph."""
     footnotes = []

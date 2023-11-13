@@ -1,13 +1,14 @@
 import streamlit as st
 
 from src.gui.data import (
-    display_dataset, dataset_selection_buttons,
-    init_data_states, ADMIN_USERS,
-    ADMIN_DATASETS, GUEST_DATASETS
+    display_dataset, create_dataset_selection_buttons,
+    create_upload_buttons,
+    init_data_states, ADMIN_USERS, RAG_USERS,
+    ADMIN_DATASETS, GUEST_DATASETS,
+    DATASET_KEY
 )
 from src.gui.chat import (
-    init_chatbot_session_state, chat_interface,
-    conversational_chat, display_chat_log
+    init_chatbot_session_state,
 )
 from src.gui.image import (
     set_background_image, get_image_base64,
@@ -42,13 +43,9 @@ h1, h2, h3, h4, h5, h6, .stMarkdown {
     color: white !important;
 }
 
-/* You may need to add further specific selectors for other widgets or parts of the UI where the color is not as expected */
+/* You may need to add further selectors for other widgets/parts of the UI where the color is not as expected */
 </style>
 """, unsafe_allow_html=True)
-
-# Initialize session state variables
-init_data_states()
-init_chatbot_session_state()
 
 # BACKGROUND --------------------------------------------------
 # Set the background image
@@ -69,16 +66,25 @@ with st.sidebar.form(key='user_form'):
     )
     submit = st.form_submit_button(label='Submit')
 
+
+# TODO: Refactor
 if submit:
+    # Initialize session state variables
+    init_data_states()
+    init_chatbot_session_state()
+
     if username.lower() in ADMIN_USERS:
         st.session_state['allowed_datasets'] = ADMIN_DATASETS
+    elif username.lower() in RAG_USERS:
+        st.session_state['allowed_datasets'] = []
     else:
         st.session_state['allowed_datasets'] = GUEST_DATASETS
 
-if 'allowed_datasets' not in st.session_state:
-    st.session_state['allowed_datasets'] = []
-
-dataset_selection_buttons(st.session_state['allowed_datasets'])
+if 'allowed_datasets' in st.session_state:
+    if st.session_state['allowed_datasets']:  # code interpreter
+        create_dataset_selection_buttons(st.session_state['allowed_datasets'])
+    else:  # RAG
+        create_upload_buttons()
 
 # DATA PREVIEW INTERFACE --------------------------------------
 # Define the custom style
@@ -105,8 +111,9 @@ st.markdown(
 # Display the custom title
 st.markdown(custom_title, unsafe_allow_html=True)
 
-if 'dataset' in st.session_state and not st.session_state['dataset'].empty:
-    display_dataset()
+if DATASET_KEY in st.session_state:
+    if not st.session_state[DATASET_KEY].empty:
+        display_dataset()
 
 # CHATBOT INTERFACE ------------------------------------------
 # user_question = chat_interface()

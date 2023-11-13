@@ -1,41 +1,64 @@
+import os
 import pandas as pd
 import streamlit as st
 
+from pathlib import Path
+
+from src.utils.loader import read_txt
+from .chat import (
+    CHAT_KEY, ASSISTANT_KEY, THREAD_KEY,
+    MESSAGES_KEY, RAG_ASSISTANT_FILE,
+    CODE_ASSISTANT_FILE,
+    FILE_IDS_KEY,
+    CLIENT_KEY,
+    create_rag_assistant,
+    create_analyst_assistant,
+    create_analyst_thread,
+    create_rag_thread,
+)
 
 # TODO: For industrialised version make sure these are stored securely!
 # Dataset URLs and their headers
 SALYTICS_KEY = 'ESG'
 MIFID_KEY = 'MIFID'
+EQUITIES_KEY = 'Equities'
 EMISSIONS_KEY = 'Emissions'
+UPLOAD_KEY = 'Upload'
 
-ADMIN_DATASETS = [
-    SALYTICS_KEY, MIFID_KEY, EMISSIONS_KEY
-]  # Admin sees all datasets
-GUEST_DATASETS = [EMISSIONS_KEY, MIFID_KEY]  # Guests see only these datasets
+DATASET_KEY = 'dataset'
+INFO_KEY = 'dataset_info'
 
+_root_path = Path(__file__).parent.parent
 PATHS = {
-    SALYTICS_KEY: "./data/cwyod/titanic.csv",
-    MIFID_KEY: "./data/cwyod/titanic.csv",
-    EMISSIONS_KEY: "./data/cwyod/titanic.csv",
+    SALYTICS_KEY: _root_path / "data/cwyod/salytics/salytics_sample.csv",
+    MIFID_KEY: _root_path / "data/cwyod/mifid/mifid_sample.csv",
+    EQUITIES_KEY: _root_path / "data/cwyod/equities/stock_prices.csv",
+    # EMISSIONS_KEY: _root_path / "data/cwyod/titanic.csv",
 }
-INFO = {
-    SALYTICS_KEY: "ESG Corporate KPIs: Key Performance Indicators from Sustainalytics for corporate environmental, social, and governance metrics.",
-    MIFID_KEY: "MiFID Sustainability Data: Corporate sustainability insights as per the Markets in Financial Instruments Directive.",
-    EMISSIONS_KEY: "Client Emissions Data: Measures of Belfius clients' financed emissions.",
+INFO_PATH = {
+    SALYTICS_KEY: _root_path / 'data/cwyod/salytics/salytics_info.txt',
+    MIFID_KEY: _root_path / 'data/cwyod/mifid/mifid_info.txt',
+    EQUITIES_KEY: _root_path / 'data/cwyod/equities/stock_price_info.txt',
+    # EMISSIONS_KEY: "Client Emissions Data: Measures of Belfius clients' financed emissions.",
 }
 
 # Define which datasets are allowed for each type of user
 ADMIN_USERS = ['admin']
+RAG_USERS = ['rag']
+
+ADMIN_DATASETS = [
+    SALYTICS_KEY, MIFID_KEY, EQUITIES_KEY,  # EMISSIONS_KEY
+]  # Admin sees all datasets
+GUEST_DATASETS = [EQUITIES_KEY]  # Guests see only these datasets
 
 
 def init_data_states():
-    if 'dataset' not in st.session_state:
-        st.session_state['dataset'] = pd.DataFrame()
-        st.session_state['dataset_info'] = ""
+    # if DATASET_KEY not in st.session_state:
+    st.session_state[DATASET_KEY] = pd.DataFrame()
+    st.session_state[INFO_KEY] = ""
 
 
-# Now update the dataset_selection_buttons function to check the session state
-def dataset_selection_buttons(allowed_datasets):
+def create_dataset_selection_buttons(allowed_datasets):
     for name in allowed_datasets:
         button_key = f'button_{name}'
         if st.sidebar.button(
@@ -43,12 +66,48 @@ def dataset_selection_buttons(allowed_datasets):
                 use_container_width=True,
                 type='primary',
         ):
-            url, info = PATHS[name], INFO[name]
-            dataset = load_data(url)
-            st.session_state['dataset_info'] = info
-            st.session_state['dataset'] = dataset
-            st.session_state['chat_log'] = []
-            st.experimental_rerun()
+            st.session_state[CHAT_KEY] = True
+
+            file_path, info = PATHS[name], read_txt(INFO_PATH[name])
+            st.session_state[INFO_KEY] = info
+            st.session_state[DATASET_KEY] = load_data(file_path)
+            create_analyst_assistant()
+            create_analyst_thread(file_path=file_path, info=info)
+            # st.experimental_rerun()  # maybe not needed - test
+
+
+def create_upload_buttons():
+    client = st.session_state[CLIENT_KEY]
+
+    # Sidebar option for users to upload their own files
+    uploaded_file = st.sidebar.file_uploader(
+        "Upload a file to OpenAI:", key="file_uploader"
+    )
+
+    # Button to upload a user's file and store the file ID
+    if st.sidebar.button("Push"):
+        # Upload file provided by user
+        if uploaded_file:
+            with open(f"{uploaded_file.name}", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+
+            # TODO: May fail when the total number of uploaded files > 20
+            file = client.files.create(
+                file=open(f"{uploaded_file.name}", "rb"),
+                purpose='assistants'
+            )
+            st.session_state[FILE_IDS_KEY].append(file.id)
+            st.sidebar.write(f"{uploaded_file.name}")
+
+    # Button to start the chat session
+    if st.sidebar.button("Start Chat"):
+        # Check if files are uploaded before starting chat
+        if st.session_state[FILE_IDS_KEY]:
+            st.session_state[CHAT_KEY] = True
+            create_rag_assistant()
+            create_rag_thread()
+        else:
+            st.sidebar.warning("Please upload at least one file to start the chat.")
 
 
 @st.cache_data
@@ -58,9 +117,8 @@ def load_data(url):
 
 
 def display_dataset():  # why are we passing the "dataset" to the function when the key doesn't change.
-    if "dataset" not in st.session_state or st.session_state["dataset"].empty:
+    if DATASET_KEY not in st.session_state or st.session_state[DATASET_KEY].empty:
         # If the dataset isn't in the session state or is empty, don't proceed
-        st.warning("No dataset loaded or dataset is empty.")
         return
 
     st.header("Dataset Preview")

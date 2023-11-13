@@ -1,59 +1,133 @@
-import tempfile
+import os
 import streamlit as st
-from streamlit_chat import message
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import ConversationalRetrievalChain
-from langchain.document_loaders.csv_loader import CSVLoader
-from langchain.vectorstores import FAISS
+
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
-def init_chatbot_session_state():
-    if 'history' not in st.session_state:
-        st.session_state['history'] = []
-    if 'csv_vectors' not in st.session_state:
-        st.session_state['csv_vectors'] = None
-    if 'chat_chain' not in st.session_state:
-        st.session_state['chat_chain'] = None
+CHAT_KEY = 'start_chat'
+CLIENT_KEY = 'client'
+MESSAGES_KEY = 'messages'
+ASSISTANT_KEY = 'assistant_id'
+THREAD_KEY = 'thread_id'
+FILE_IDS_KEY = 'file_id_list'
+
+RAG_ASSISTANT_FILE = './data/rag_assistant_id.txt'
+CODE_ASSISTANT_FILE = './data/code_assistant_id.txt'
+MODEL = 'gpt-4-1106-preview'
 
 
-def init_chat_chain(csv_file_path, api_key):
-    loader = CSVLoader(file_path=csv_file_path, encoding="utf-8")
-    data = loader.load()
-    embeddings = OpenAIEmbeddings()
-    vectors = FAISS.from_documents(data, embeddings)
-    return ConversationalRetrievalChain.from_llm(
-        llm=ChatOpenAI(temperature=0.0, model_name='gpt-3.5-turbo', openai_api_key=api_key),
-        retriever=vectors.as_retriever()
+load_dotenv()
+if not os.getenv("OPENAI_API_KEY"):
+    raise KeyError(
+        "You will need an OPENAI_API_KEY to use the LLM models in this notebook."
     )
 
 
-def conversational_chat(query, chain):
-    result = chain({"question": query, "chat_history": st.session_state['history']})
-    st.session_state['history'].append((query, result["answer"]))
-    return result["answer"]
+def init_chatbot_session_state():
+    # if CHAT_KEY not in st.session_state:
+    st.session_state[CHAT_KEY] = False
+    st.session_state[MESSAGES_KEY] = []
+    st.session_state[ASSISTANT_KEY] = None
+    st.session_state[THREAD_KEY] = None
+    st.session_state[FILE_IDS_KEY] = []
+    st.session_state[CLIENT_KEY] = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
 
 
-def chat_interface():
-    user_input = st.text_input("You:", key="user_input")
-    if user_input and 'chat_chain' in st.session_state and st.session_state['chat_chain']:
-        return user_input
-    return None
+def create_rag_assistant():
+    client = st.session_state[CLIENT_KEY]
+    if os.path.exists(RAG_ASSISTANT_FILE):
+        with open(RAG_ASSISTANT_FILE, 'r') as file:
+            assistant_id = file.read().strip()
+    else:
+        assistant = client.beta.assistant.create(
+            name="RAG Assistant",
+            description="Information retriever agent",
+            instructions="""
+            You are tailored to facilitate precise and accurate question answering.
+            First use the retriever function to search for
+            relevant information to answer user requests. If information 
+            is found, cite it with the appropriate source from the document.
+            Second, if information is not found in the document, try to think through the question and provide 
+            an answer based on knowledge you posses. If you are unable to accurately answer, clearly state 
+            that information is not in the document and that are unable to answer with sufficient accuracy.
+            Communicate clearly with the user about whether relevant information was found, an answer was 
+            provided based on your own knowledge, or if you cannot answer with high accuracy.
+            Keep track of the queries that have been asked and the information that was extracted to better
+            meet the needs of the user. 
+            """,
+            tools=[{"type": "retrieval"}],
+            model=MODEL,
+        )
+        assistant_id = assistant.id
+
+        with open(RAG_ASSISTANT_FILE, 'w') as file:
+            file.write(assistant_id)
+
+    st.session_state[ASSISTANT_KEY] = assistant_id
 
 
-def display_chat_log():
-    if st.session_state['chat_log']:
-        for user_text, bot_response in st.session_state['chat_log']:
-            message(user_text, is_user=True)
-            message(bot_response)
+# TODO: Create functionality for RAG.
+def create_rag_thread():
+    client = st.session_state[CLIENT_KEY]
+    file_ids = st.session_state[FILE_IDS_KEY]
+    thread = client.beta.threads.create(
+        messages=[
+            {
+                "role": "user",
+                "content": "Use the provided files to answer user queries.",
+                "file_ids": file_ids,
+            }
+        ]
+    )
+    st.session_state[THREAD_KEY] = thread.id
 
 
-def setup_sidebar():
-    user_api_key = st.sidebar.text_input("Your OpenAI API key", type="password")
-    uploaded_file = st.sidebar.file_uploader("Upload CSV", type="csv")
+def create_analyst_assistant():  # TODO add info as input in the future
+    client = st.session_state[CLIENT_KEY]
+    if os.path.exists(CODE_ASSISTANT_FILE):
+        with open(CODE_ASSISTANT_FILE, 'r') as file:
+            assistant_id = file.read().strip()
+    else:
+        assistant = client.beta.assistant.create(
+            name="Analytics Chatbot",
+            instructions="""
+            You are tailored to facilitate advanced CSV data analysis and 
+            visualization within a Streamlit environment. You are to generate Python code 
+            for data manipulation and visualization tasks, responding to user queries with precision. 
+            You will interact through Streamlit components, offering 
+            a dynamic and responsive user experience. You are to uphold a friendly and patient demeanor, 
+            actively seeking clarification of ambiguous user requests. You are 
+            equipped to incrementally learn from each interaction to improve 
+            your ability to satisfy user requests.
+            """,
+            tools=[{"type": "code_interpreter"}],  # TODO; add custom functions for information retrieval
+            model=MODEL,
+        )
+        assistant_id = assistant.id
 
-    if uploaded_file and user_api_key:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            tmp_file_path = tmp_file.name
-        st.session_state['chat_chain'] = init_chat_chain(tmp_file_path, user_api_key)
+        with open(CODE_ASSISTANT_FILE, 'w') as file:
+            file.write(assistant_id)
+
+    st.session_state[ASSISTANT_KEY] = assistant_id
+
+
+def create_analyst_thread(file_path: str, info: str):
+    client = st.session_state[CLIENT_KEY]
+
+    file = client.files.create(
+        file=open(file_path, "rb"),
+        purpose='assistants'
+    )
+    thread = client.beta.threads.create(
+        messages=[
+            {
+                "role": "user",
+                "content": info[:250],  # TODO: Improve content fetching
+                "file_ids": [file.id],
+            }
+        ]
+    )
+    st.session_state[THREAD_KEY] = thread.id
