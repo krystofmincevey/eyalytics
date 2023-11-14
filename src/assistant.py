@@ -26,11 +26,11 @@ client = OpenAI(api_key=KEY)
 
 root_path = Path(__file__).parent.parent
 stock_prices = client.files.create(
-  file=open(root_path / "data/cwyod/stock_prices.csv", "rb"),
+  file=open(root_path / "data/cwyod/equities/stock_prices.csv", "rb"),
   purpose='assistants'
 )
 mifid = client.files.create(
-  file=open(root_path / "data/cwyod/mifid_sample.csv", "rb"),
+  file=open(root_path / "data/cwyod/mifid/mifid_sample.csv", "rb"),
   purpose='assistants'
 )
 
@@ -110,7 +110,6 @@ while True:
         thread_id=thread.id
     )
     print(messages)
-    print(len(messages))
     # content = client.files.retrieve_content(file.id)
 
     print(

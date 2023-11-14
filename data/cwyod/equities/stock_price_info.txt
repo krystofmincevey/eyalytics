@@ -1,0 +1,17 @@
+The table shows historical stock data, obtained from Yahoo finance, for US listed companies. Describing the columns:
+
+Date:  Date Examples; 30/10/2023, 31/10/2023, 01/11/2023, 02/11/2023, 03/11/2023, and 06/11/2023
+
+Open: The opening stock price in USD. Open Examples; 146.350006, 147.5, 147.279999, 312.299988, and 310.98999
+
+High: The maximum stock price observed during a trading day in USD. High Examples; 329.190002, 330.299988, 331.100006, 332.820007, 210.880005, and 202.800003
+
+Low: The minimum stock price observed during a trading day in USD. Low Examples; 210.419998, 202.509995, 214.110001, and 212.199997
+
+Close: The closing stock price adjusted for splits in USD.  Close Examples; 207.300003, 197.360001, 200.839996, 205.660004, and 218.509995
+
+Adj Close: THe adjusted close price adjusted for splits and dividend and/or capital gain distributions in USD. Adj Close Examples; 
+
+Volume: The total trade volume observed during trading hours. Volume Examples; 25807100, 17836000, and 26297600.
+
+Ticker: The US stock ticker of a company. Ticker Examples; TSLA (for Tesla), JPM (for JP Morgan), and META (for Meta Platforms).

@@ -33,31 +33,27 @@ PATHS = {
     SALYTICS_KEY: _root_path / "data/cwyod/salytics/salytics_sample.csv",
     MIFID_KEY: _root_path / "data/cwyod/mifid/mifid_sample.csv",
     EQUITIES_KEY: _root_path / "data/cwyod/equities/stock_prices.csv",
-    # EMISSIONS_KEY: _root_path / "data/cwyod/titanic.csv",
+    EMISSIONS_KEY: _root_path / "data/cwyod/emissions/general_purpose.csv",
 }
 INFO_PATH = {
     SALYTICS_KEY: _root_path / 'data/cwyod/salytics/salytics_info.txt',
     MIFID_KEY: _root_path / 'data/cwyod/mifid/mifid_info.txt',
     EQUITIES_KEY: _root_path / 'data/cwyod/equities/stock_price_info.txt',
-    # EMISSIONS_KEY: "Client Emissions Data: Measures of Belfius clients' financed emissions.",
+    EMISSIONS_KEY: _root_path / 'data/cwyod/emissions/general_purpose_info.txt',
 }
 
-# Define which datasets are allowed for each type of user
-ADMIN_USERS = ['admin']
-RAG_USERS = ['rag']
-
 ADMIN_DATASETS = [
-    SALYTICS_KEY, MIFID_KEY, EQUITIES_KEY,  # EMISSIONS_KEY
+    SALYTICS_KEY, MIFID_KEY, EQUITIES_KEY,  EMISSIONS_KEY
 ]  # Admin sees all datasets
 GUEST_DATASETS = [EQUITIES_KEY]  # Guests see only these datasets
 
 
 def init_data_states():
-    # if DATASET_KEY not in st.session_state:
     st.session_state[DATASET_KEY] = pd.DataFrame()
     st.session_state[INFO_KEY] = ""
 
 
+# TODO: add message reset once pressed.
 def create_dataset_selection_buttons(allowed_datasets):
     for name in allowed_datasets:
         button_key = f'button_{name}'
@@ -66,16 +62,31 @@ def create_dataset_selection_buttons(allowed_datasets):
                 use_container_width=True,
                 type='primary',
         ):
-            st.session_state[CHAT_KEY] = True
-
+            # Load data:
             file_path, info = PATHS[name], read_txt(INFO_PATH[name])
             st.session_state[INFO_KEY] = info
             st.session_state[DATASET_KEY] = load_data(file_path)
-            create_analyst_assistant()
-            create_analyst_thread(file_path=file_path, info=info)
+
+            # Prepare chat interface:
+            st.session_state[CHAT_KEY] = True
+            st.session_state[MESSAGES_KEY] = []  # empty messages
+
+            client = st.session_state[CLIENT_KEY]
+            file = client.files.create(
+                file=open(file_path, "rb"),
+                purpose='assistants'
+            )
+
+            st.session_state[FILE_IDS_KEY] = [file.id]
+            st.session_state[ASSISTANT_KEY] = create_analyst_assistant(client)
+            st.session_state[THREAD_KEY] = create_analyst_thread(
+                client, file_ids=[file.id], info=info,
+            )
             # st.experimental_rerun()  # maybe not needed - test
 
 
+# TODO: Add file removal: openai.File.delete(sid=file_id). Below
+#  may fail when the total number of uploaded files > 20.
 def create_upload_buttons():
     client = st.session_state[CLIENT_KEY]
 
@@ -84,30 +95,31 @@ def create_upload_buttons():
         "Upload a file to OpenAI:", key="file_uploader"
     )
 
-    # Button to upload a user's file and store the file ID
-    if st.sidebar.button("Push"):
-        # Upload file provided by user
-        if uploaded_file:
-            with open(f"{uploaded_file.name}", "wb") as f:
-                f.write(uploaded_file.getbuffer())
+    uploaded_files = st.file_uploader(
+        "Upload a file to OpenAI:", key="file_uploader",
+        accept_multiple_files=True
+    )
+    for uploaded_file in uploaded_files:
+        with open(f"{uploaded_file.name}", "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
-            # TODO: May fail when the total number of uploaded files > 20
-            file = client.files.create(
-                file=open(f"{uploaded_file.name}", "rb"),
-                purpose='assistants'
-            )
-            st.session_state[FILE_IDS_KEY].append(file.id)
-            st.sidebar.write(f"{uploaded_file.name}")
+        file = client.files.create(
+            file=open(f"{uploaded_file.name}", "rb"),
+            purpose='assistants'
+        )
+        st.session_state[FILE_IDS_KEY].append(file.id)
+        st.sidebar.write(f"{uploaded_file.name}")
 
     # Button to start the chat session
     if st.sidebar.button("Start Chat"):
-        # Check if files are uploaded before starting chat
-        if st.session_state[FILE_IDS_KEY]:
-            st.session_state[CHAT_KEY] = True
-            create_rag_assistant()
-            create_rag_thread()
-        else:
-            st.sidebar.warning("Please upload at least one file to start the chat.")
+        # Prepare chat interface:
+        st.session_state[CHAT_KEY] = True
+        st.session_state[MESSAGES_KEY] = []  # empty messages
+        st.session_state[ASSISTANT_KEY] = create_rag_assistant(client)
+        st.session_state[THREAD_KEY] = create_rag_thread(
+            client,
+            file_ids=st.session_state[FILE_IDS_KEY],
+        )
 
 
 @st.cache_data

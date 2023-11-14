@@ -1,0 +1,32 @@
+MiFID Sustainability Data: Corporate sustainability insights as per the Markets in Financial Instruments Directive.
+
+| Column Name | Description |
+| nm_rentity_262issu | The research entity id used to identify companies internally by sustainalytics.
+| nm_cmpname_262issu  | The company name; eg: JM SMUCKER CO, EVOLUTION PETROLEUM CORP, POSTNL NV, BERKSHIRE HILLS BANCORP, INC
+| incl_enrgy_cns_agr_forst_fish | whether the company consumes energy from renewable sources in the agriculture, forestry, and fishing sectors (1 = yes, 0 = no). |
+| incl_enrgy_cns_real_estate | whether the company consumes energy from renewable sources in the real estate sector (1 = yes, 0 = no). |
+| incl_enrgy_cns_elect_gas_steam | whether the company consumes energy from renewable sources in the electricity, gas, steam, and air conditioning supply sector (1 = yes, 0 = no). |
+| incl_emiss_air_pollutant | whether the company emits air pollutants (1 = yes, 0 = no). |
+| incl_excessive_ceo_pay_ratio | whether the company has an excessive ceo pay ratio (1 = yes, 0 = no). |
+| incl_carbon_intensity | the company's carbon intensity (i.e., carbon emissions per unit of revenue). |
+| incl_hazardous_waste | whether the company produces hazardous waste (1 = yes, 0 = no). |
+| incl_non_recycle_waste | whether the company generates non-recycled waste (1 = yes, 0 = no). |
+| incl_water_cns | whether the company consumes water (1 = yes, 0 = no). |
+| incl_carbon_fossil_fuel | whether the company is involved in fossil fuels (1 = yes, 0 = no). |
+| excl_record_work_injuries | whether the company has a high recordable work-related injuries rate (1 = yes, 0 = no). |
+| excl_enrgy_cns_agr_forst_fish | whether the company does not consume energy from renewable sources in the agriculture, forestry, and fishing sectors (1 = yes, 0 = no). |
+| excl_enrgy_cns_real_estate | whether the company does not consume energy from renewable sources in the real estate sector (1 = yes, 0 = no). |
+| excl_enrgy_cns_elect_gas_steam | whether the company does not consume energy from renewable sources in the electricity, gas, steam, and air conditioning supply sector (1 = yes, 0 = no). |
+| excl_emiss_air_pollutant | whether the company does not emit air pollutants (1 = yes, 0 = no). |
+| excl_excessive_ceo_pay_ratio | whether the company does not have an excessive ceo pay ratio (1 = yes, 0 = no). |
+| excl_hazardous_waste | whether the company does not produce hazardous waste (1 = yes, 0 = no). |
+| excl_non_recycle_waste | whether the company does not generate non-recycled waste (1 = yes, 0 = no). |
+| excl_carbon_intensity | whether the company does not have a high carbon intensity (i.e., carbon emissions per unit of revenue). |
+| excl_water_cns | whether the company does not consume water (1 = yes, 0 = no). |
+| excl_acti_neg_biodiversity | whether the company does not have any activities that negatively affect biodiversity (1 = yes, 0 = no). |
+| excl_un_gbl_principles_oecd | whether the company does not breach the un global compact principles or the oecd guidelines for multinational enterprises (1 = yes, 0 = no). |
+| excl_contro_weapons | whether the company does not produce or trade in controversial weapons (1 = yes, 0 = no). |
+| tap_status| Whether something is tap compliant or not (1 = yes, 0 = no). When a company is tap compliant (1) it means that it does not trade in tobacco, weapons, gambling, or pornogrophy.	
+| ts_flag	| This binary flag indicates whether or not a company is considered "transition sustainable" (TS). A company is considered TS if it meets two criteria: At least one contributing vectorized column is True (1) while all exclusionary columns are False (0). This means that the company has at least one positive ESG characteristic and no negative ESG characteristics. The company is tap compliant (tap status 1). This means that the company does not produce or trade in controversial weapons, gambling, tobacco or pornography. If a company meets both of these criteria, then its ts_flag value is 1. Otherwise, its ts_flag value is 0.
+| nm_actor_262issu | Internal Belfius compnay id (called the actor id).	
+| date | Data upload date (eg: 08/09/2023).
