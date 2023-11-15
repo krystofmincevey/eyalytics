@@ -17,7 +17,8 @@ from src.gui.chat import (
     init_chatbot_session_state, CHAT_KEY, chat
 )
 from src.gui.image import (
-    set_background_image, get_image_base64,
+    set_background_image,
+    get_image_base64,
     set_logo,
 )
 from src.gui.users import (
@@ -27,39 +28,77 @@ from src.gui.users import (
 
 
 st.markdown("""
-<style>
-/* Global font color */
-body {
-    color: white;
-}
-
-/* Headers, descriptions, text inside expanders */
-h1, h2, h3, h4, h5, h6, .stMarkdown {
-    color: white !important;
-}
-
-/* For text input and selectbox values */
-.stTextInput input, .stSelectbox select {
-    color: black !important;
-}
-
-/* Selectbox label color - adjust this class as needed */
-.stSelectbox label, .stTextInput label {
-    color: white !important;
-}
-
-/* Text inside an expander */
-.stExpander .stMarkdown p {
-    color: white !important;
-}
-
-/* You may need to add further selectors for other widgets/parts of the UI where the color is not as expected */
-</style>
-""", unsafe_allow_html=True)
+    <style>
+    /* Global background color */
+    body, .stApp {
+        background-color: black !important;
+    }
+    
+    /* Global font color */
+    body, .stMarkdown {
+        color: white !important;
+    }
+    
+    /* Headers, descriptions, text inside expanders */
+    h1, h2, h3, h4, h5, h6 {
+        color: white !important;
+    }
+    
+    /* Selectbox label color - adjust this class as needed */
+    .stSelectbox label, .stTextInput label {
+        color: white !important;
+    }
+    
+    /* Text inside an expander */
+    .stExpander .stMarkdown p {
+        color: white !important;
+    }
+    
+    /* Adjust sidebar background color */
+    [data-testid=stSidebar] {
+        background-color: #333333 !important;
+    }
+    
+    .stChat {
+      background-color: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    
+    .stContainer {
+      background-color: transparent !important;
+      margin: 0 !important;
+      border: none !important;
+    }
+    
+    .stChat input {
+      background-color: transparent !important;
+    }
+    
+    .stChat button {
+      font-color: white !important;
+    }
+    
+    .stChatInput {
+        background-color: transparent !important;
+    }
+    
+    .stChatInput input {
+        background-color: transparent !important;
+    }
+    
+    .stChatFloatingInputContainer {
+        background-color: transparent !important;
+    }
+    
+    /* You may need to add further selectors for other widgets/parts of the UI where the color is not as expected */
+    </style>
+    """, unsafe_allow_html=True
+)
 
 # BACKGROUND --------------------------------------------------
 # Set the background image
-background_image_path = './img/belfius_equal.jpg'
+background_image_path = './img/belfius_equal_dark.jpg'
 set_background_image(get_image_base64(background_image_path))
 
 # SIDEBAR -----------------------------------------------------
@@ -132,12 +171,3 @@ if st.session_state.get(DATASET_KEY) is not None and not st.session_state[DATASE
 
 if st.session_state.get(CHAT_KEY) and st.session_state[CHAT_KEY]:
     chat()
-
-# CHATBOT INTERFACE ------------------------------------------
-# user_question = chat_interface()
-# if user_question:
-#     ai_response = conversational_chat(user_question, st.session_state['chat_chain'])
-#     st.session_state['chat_log'].append((user_question, ai_response))
-#
-# # Display the chat log
-# display_chat_log()

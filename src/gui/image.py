@@ -16,7 +16,7 @@ def create_rounded_icon(path, size=(60, 60)):
 
 
 # Load and process logos
-USER_LOGO = create_rounded_icon('./img/user_logo.jpg')
+USER_LOGO = create_rounded_icon('./img/user_logo_dark.jpg')
 ASSISTANT_LOGO = create_rounded_icon('./img/ai_logo_2.jpg')
 
 
@@ -36,6 +36,19 @@ def set_background_image(image_path):
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def set_dark_background():
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-color: #222222;
         }}
         </style>
         """,

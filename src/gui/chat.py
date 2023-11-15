@@ -204,9 +204,6 @@ def process_response(client, thread_id: str, run):
         messages_json = messages.model_dump()
         json.dump(messages_json, f, indent=4)
 
-    print("In process_responses")
-    print(messages_json)
-
     run_steps = client.beta.threads.runs.steps.list(
         thread_id=thread_id,
         run_id=run.id,
@@ -224,10 +221,6 @@ def process_response(client, thread_id: str, run):
         if message.run_id == run.id and message.role == "assistant"
     ]
     for message in reversed(assistant_messages_for_run):
-
-        print('in messages processing for loop')
-        print(message)
-
         if message.content:
             citations = []
 
@@ -284,14 +277,11 @@ def chat():
     # Display existing messages in the chat
     # Group messages by consecutive roles
     grouped_messages = []
-    for message in reversed(st.session_state.messages):
+    for message in st.session_state.messages:
         if not grouped_messages or message["role"] != grouped_messages[-1][0]["role"]:
             grouped_messages.append([message])
         else:
             grouped_messages[-1].append(message)
-
-    print("grouped messages")
-    print(grouped_messages)
 
     # Display grouped messages
     for group in grouped_messages:
@@ -306,18 +296,10 @@ def chat():
 
             # Display all messages in the group
             for message in group:
-                print('Message in grouped_messages')
-                print(message)
                 display_message(col2, message)
 
     # Chat input for the user
-    # if prompt := st.chat_input("Message BelfiusGPT..."):
-
-    # User input text box
-    prompt = st.text_input("Message ChatGPT...", key="input")
-
-    # Send button
-    if st.button("Send"):
+    if prompt := st.chat_input("Message BelfiusGPT..."):
         # Add user message to the state and display it
         message = {"role": "user", "type": "text", "content": prompt}
         st.session_state[MESSAGES_KEY].append(
