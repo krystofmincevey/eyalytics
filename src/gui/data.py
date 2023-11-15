@@ -86,7 +86,7 @@ def create_dataset_selection_buttons(allowed_datasets):
 
 
 # TODO: Add file removal: openai.File.delete(sid=file_id). Below
-#  may fail when the total number of uploaded files > 20.
+#  may fail when the total number of uploaded files > 20. To be seen!
 def create_upload_buttons():
     client = st.session_state[CLIENT_KEY]
 
