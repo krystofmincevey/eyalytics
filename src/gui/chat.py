@@ -228,9 +228,8 @@ def process_response(client, thread_id: str, run):
                 if content_part.type == 'text':
                     annotations = content_part.text.annotations
                     text_value = content_part.text.value
-
                     for index, annotation in enumerate(annotations):
-                        text_value = text_value.replace(annotations.text, f' [{index}]')
+                        text_value = text_value.replace(annotation.text, f' [{index}]')
                         if file_citation := getattr(annotation, 'file_citation', None):
                             cited_file = client.files.retrieve(file_citation.file_id)
                             citations.append(f'[{index}] {file_citation.quote} from {cited_file.filename}')

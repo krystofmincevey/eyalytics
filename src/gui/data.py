@@ -91,11 +91,7 @@ def create_upload_buttons():
     client = st.session_state[CLIENT_KEY]
 
     # Sidebar option for users to upload their own files
-    uploaded_file = st.sidebar.file_uploader(
-        "Upload a file to OpenAI:", key="file_uploader"
-    )
-
-    uploaded_files = st.file_uploader(
+    uploaded_files = st.sidebar.file_uploader(
         "Upload a file to OpenAI:", key="file_uploader",
         accept_multiple_files=True
     )
@@ -133,7 +129,7 @@ def display_dataset():  # why are we passing the "dataset" to the function when 
         # If the dataset isn't in the session state or is empty, don't proceed
         return
 
-    st.header("Dataset Preview")
+    # st.markdown('<h1 style="text-align: center;">Dataset Preview</h1>', unsafe_allow_html=True)
     dataset = st.session_state["dataset"]
 
     # Check if the filters state exists; if not, initialize it

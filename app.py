@@ -27,6 +27,9 @@ from src.gui.users import (
 )
 
 
+NAME = "BelfiusGPT+"
+
+
 st.markdown("""
     <style>
     /* Global background color */
@@ -37,6 +40,10 @@ st.markdown("""
     /* Global font color */
     body, .stMarkdown {
         color: white !important;
+    }
+    
+    .stDataFrame {
+      text-align: center;
     }
     
     /* Headers, descriptions, text inside expanders */
@@ -88,7 +95,7 @@ st.markdown("""
     }
     
     .stChatFloatingInputContainer {
-        background-color: transparent !important;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 1)) !important;
     }
     
     /* You may need to add further selectors for other widgets/parts of the UI where the color is not as expected */
@@ -135,20 +142,21 @@ if submit:
 # DATA PREVIEW INTERFACE --------------------------------------
 # Define the custom style
 custom_title = """
-<div style="
-    text-align: center; /* Horizontally center the content */
-    width: 100%; /* Ensure the div takes up the full width */
-">
     <div style="
-        font-size: 60px;
-        font-weight: bold;
-        color: white; /* Belfius red */
-        text-shadow: 2px 2px 2px #555; /* subtle shadow for depth */
-        font-family: 'Open Sans', sans-serif; /* sleek, modern font */
+        text-align: center; /* Horizontally center the content */
+        width: 100%; /* Ensure the div takes up the full width */
     ">
-        {0}
+        <div style="
+            font-size: 60px;
+            font-weight: bold;
+            color: white; /* Belfius red */
+            text-shadow: 2px 2px 2px #555; /* subtle shadow for depth */
+            font-family: 'Open Sans', sans-serif; /* sleek, modern font */
+            vertical-align: middle; /* Vertically center the text content */
+        ">
+            {0}
+        </div>
     </div>
-</div>
 """
 
 # Load the Google Fonts stylesheet for 'Open Sans'
@@ -160,11 +168,11 @@ st.markdown(
 # Dataset Selection or Upload Buttons
 if 'allowed_datasets' in st.session_state:
     if st.session_state['allowed_datasets']:  # code interpreter to be used with CSVs
-        st.markdown(custom_title.format('Belfius Analytics'), unsafe_allow_html=True)
         create_dataset_selection_buttons(st.session_state['allowed_datasets'])
     else:  # RAG - no CSVs shared
-        st.markdown(custom_title.format('BelfiusGPT+'), unsafe_allow_html=True)
         create_upload_buttons()
+
+st.markdown(custom_title.format(NAME), unsafe_allow_html=True)
 
 if st.session_state.get(DATASET_KEY) is not None and not st.session_state[DATASET_KEY].empty:
     display_dataset()
