@@ -1,0 +1,68 @@
+{
+    "data": [
+        {
+            "id": "step_bAgnXdubJS4c0uFJGnWgraqJ",
+            "assistant_id": "asst_mgtDULFvNuCKs6ugaGm0m7aH",
+            "cancelled_at": null,
+            "completed_at": 1700007178,
+            "created_at": 1700007176,
+            "expired_at": null,
+            "failed_at": null,
+            "last_error": null,
+            "metadata": null,
+            "object": "thread.run.step",
+            "run_id": "run_HkxhvPVFErTjBG3qD4BsRFSv",
+            "status": "completed",
+            "step_details": {
+                "message_creation": {
+                    "message_id": "msg_Dhp35kNAuFignE8wgM13IV1F"
+                },
+                "type": "message_creation"
+            },
+            "thread_id": "thread_9gFYX48M2fCzqOJM22PxCpjL",
+            "type": "message_creation",
+            "expires_at": null
+        },
+        {
+            "id": "step_jOhW2qvRd0gy8UiTRuA84Zvy",
+            "assistant_id": "asst_mgtDULFvNuCKs6ugaGm0m7aH",
+            "cancelled_at": null,
+            "completed_at": 1700007176,
+            "created_at": 1700007162,
+            "expired_at": null,
+            "failed_at": null,
+            "last_error": null,
+            "metadata": null,
+            "object": "thread.run.step",
+            "run_id": "run_HkxhvPVFErTjBG3qD4BsRFSv",
+            "status": "completed",
+            "step_details": {
+                "tool_calls": [
+                    {
+                        "id": "call_ioLu9CgclXRtnds8Jr66QjUP",
+                        "code_interpreter": {
+                            "input": "import matplotlib.pyplot as plt\n\n# Filter data for Tesla (TSLA)\ntesla_data = stock_data[stock_data['Ticker'] == 'TSLA']\n\n# Ensure that 'Date' is a datetime object\ntesla_data['Date'] = pd.to_datetime(tesla_data['Date'], format='%d/%m/%Y')\n\n# Sorting the data based on Date just in case it's not sorted\ntesla_data = tesla_data.sort_values('Date')\n\n# Plot the Tesla stock prices\nplt.figure(figsize=(14, 7))\nplt.plot(tesla_data['Date'], tesla_data['Close'], label='Close Price', color='blue')\nplt.title('Tesla Stock Price')\nplt.xlabel('Date')\nplt.ylabel('Price (USD)')\nplt.legend()\nplt.grid(True)\nplt.tight_layout()\n\n# Display the plot\nplt.show()",
+                            "outputs": [
+                                {
+                                    "image": {
+                                        "file_id": "file-Ug6hAFgiEVLDPbhEypwBkEYs"
+                                    },
+                                    "type": "image"
+                                }
+                            ]
+                        },
+                        "type": "code_interpreter"
+                    }
+                ],
+                "type": "tool_calls"
+            },
+            "thread_id": "thread_9gFYX48M2fCzqOJM22PxCpjL",
+            "type": "tool_calls",
+            "expires_at": null
+        }
+    ],
+    "object": "list",
+    "first_id": "step_bAgnXdubJS4c0uFJGnWgraqJ",
+    "last_id": "step_jOhW2qvRd0gy8UiTRuA84Zvy",
+    "has_more": false
+}

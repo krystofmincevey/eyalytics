@@ -28,18 +28,18 @@ UPLOAD_KEY = 'Upload'
 DATASET_KEY = 'dataset'
 INFO_KEY = 'dataset_info'
 
-_root_path = Path(__file__).parent.parent
+_root_path = Path(__file__).parent.parent.parent
 PATHS = {
-    SALYTICS_KEY: _root_path / "data/cwyod/salytics/salytics_sample.csv",
-    MIFID_KEY: _root_path / "data/cwyod/mifid/mifid_sample.csv",
-    EQUITIES_KEY: _root_path / "data/cwyod/equities/stock_prices.csv",
-    EMISSIONS_KEY: _root_path / "data/cwyod/emissions/general_purpose.csv",
+    SALYTICS_KEY: _root_path / "data" / "cwyod" / "salytics" / "salytics_sample.csv",
+    MIFID_KEY: _root_path / "data" / "cwyod" / "mifid" / "mifid_sample.csv",
+    EQUITIES_KEY: _root_path / "data" / "cwyod" / "equities" / "stock_prices.csv",
+    EMISSIONS_KEY: _root_path / "data" / "cwyod" / "emissions" / "general_purpose.csv",
 }
 INFO_PATH = {
-    SALYTICS_KEY: _root_path / 'data/cwyod/salytics/salytics_info.txt',
-    MIFID_KEY: _root_path / 'data/cwyod/mifid/mifid_info.txt',
-    EQUITIES_KEY: _root_path / 'data/cwyod/equities/stock_price_info.txt',
-    EMISSIONS_KEY: _root_path / 'data/cwyod/emissions/general_purpose_info.txt',
+    SALYTICS_KEY: _root_path / "data" / "cwyod" / "salytics" / "salytics_info.txt",
+    MIFID_KEY: _root_path / "data" / "cwyod" / "mifid" / "mifid_info.txt",
+    EQUITIES_KEY: _root_path / "data" / "cwyod" / "equities" / "stock_price_info.txt",
+    EMISSIONS_KEY: _root_path / "data" / "cwyod" / "emissions" / "general_purpose_info.txt",
 }
 
 ADMIN_DATASETS = [

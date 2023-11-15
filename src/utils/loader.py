@@ -1,15 +1,15 @@
 import os
 import re
-import camelot
+# import camelot
 import tabula
 import PyPDF2
-import pdfplumber
+# import pdfplumber
 import slate3k as slate
 import docx
 
 from typing import List, Dict
 from tqdm.auto import tqdm
-from pdfminer.high_level import extract_text
+# from pdfminer.high_level import extract_text
 from docx2python import docx2python
 
 
@@ -449,16 +449,16 @@ class PDFLoader(Loader):
                 text_content.append(page.extract_text())
         return text_content
 
-    @staticmethod
-    def pdfminer_text_loader(file_path: str) -> List[str]:
-        """
-        Extract text from a PDF file using pdfminer.
-
-        :param file_path: The path to the PDF file.
-        :return: A list of strings, where each string represents a line of text.
-        """
-        text_content = extract_text(file_path)
-        return text_content.split('\n')  # Splitting by newline to get a list of lines
+    # @staticmethod
+    # def pdfminer_text_loader(file_path: str) -> List[str]:
+    #     """
+    #     Extract text from a PDF file using pdfminer.
+    #
+    #     :param file_path: The path to the PDF file.
+    #     :return: A list of strings, where each string represents a line of text.
+    #     """
+    #     text_content = extract_text(file_path)
+    #     return text_content.split('\n')  # Splitting by newline to get a list of lines
 
     @staticmethod
     def slate_text_loader(file_path) -> List[str]:
@@ -490,39 +490,39 @@ class PDFLoader(Loader):
         tables = re.findall(r'(\d+ \d+ \d+)', text_content)
         return tables
 
-    @staticmethod
-    def pdfplumber_text_loader(file_path) -> List[str]:
-        """
-        Extract text from a PDF file using pdfplumber.
+    # @staticmethod
+    # def pdfplumber_text_loader(file_path) -> List[str]:
+    #     """
+    #     Extract text from a PDF file using pdfplumber.
+    #
+    #     :param file_path: The path to the PDF file.
+    #     :return: A list of strings, where each string represents the text content of a page.
+    #     """
+    #     with pdfplumber.open(file_path) as pdf:
+    #         text_content = [page.extract_text() for page in pdf.pages]
+    #     return text_content
 
-        :param file_path: The path to the PDF file.
-        :return: A list of strings, where each string represents the text content of a page.
-        """
-        with pdfplumber.open(file_path) as pdf:
-            text_content = [page.extract_text() for page in pdf.pages]
-        return text_content
-
-    @staticmethod
-    def pdfplumber_table_loader(file_path) -> List[str]:
-        """
-        Extract tables from a PDF file using pdfplumber.
-
-        :param file_path: The path to the PDF file.
-        :return: A list of tables, where each table is represented as a list of rows,
-                 and each row is a list of strings.
-        """
-        with pdfplumber.open(file_path) as pdf:
-            tables = []
-            for page in pdf.pages:
-                page_tables = page.extract_tables()
-                tables.extend(page_tables)
-
-        # Convert the tables to list of strings
-        result = []
-        for table in tables:
-            for row in table:
-                result.append(' '.join(row))
-        return result
+    # @staticmethod
+    # def pdfplumber_table_loader(file_path) -> List[str]:
+    #     """
+    #     Extract tables from a PDF file using pdfplumber.
+    #
+    #     :param file_path: The path to the PDF file.
+    #     :return: A list of tables, where each table is represented as a list of rows,
+    #              and each row is a list of strings.
+    #     """
+    #     with pdfplumber.open(file_path) as pdf:
+    #         tables = []
+    #         for page in pdf.pages:
+    #             page_tables = page.extract_tables()
+    #             tables.extend(page_tables)
+    #
+    #     # Convert the tables to list of strings
+    #     result = []
+    #     for table in tables:
+    #         for row in table:
+    #             result.append(' '.join(row))
+    #     return result
 
     @staticmethod
     def pypdf2_table_loader(file_path) -> List[str]:
@@ -579,21 +579,21 @@ class PDFLoader(Loader):
                     result.append(item)
         return result
 
-    @staticmethod
-    def camelot_table_loader(file_path: str) -> List[str]:
-        """
-        Extract tables from a PDF file using Camelot.
-
-        :param file_path: The path to the PDF file.
-        :return: A list of strings, where each string represents a table row.
-        """
-        tables = camelot.read_pdf(file_path, pages='all', flavor='stream')
-        result = []
-        for table in tables:
-            df = table.df
-            for index, row in df.iterrows():
-                result.append(' '.join(row))
-        return result
+    # @staticmethod
+    # def camelot_table_loader(file_path: str) -> List[str]:
+    #     """
+    #     Extract tables from a PDF file using Camelot.
+    #
+    #     :param file_path: The path to the PDF file.
+    #     :return: A list of strings, where each string represents a table row.
+    #     """
+    #     tables = camelot.read_pdf(file_path, pages='all', flavor='stream')
+    #     result = []
+    #     for table in tables:
+    #         df = table.df
+    #         for index, row in df.iterrows():
+    #             result.append(' '.join(row))
+    #     return result
 
     @staticmethod
     def tabula_table_loader(file_path: str) -> List[str]:
@@ -618,16 +618,16 @@ class PDFLoader(Loader):
     TEXT_LOADERS = {
         PYPDF2_KEY: pypdf2_text_loader,
         SLATE_KEY: slate_text_loader,
-        PLUMBER_KEY: pdfplumber_text_loader,
-        MINER_KEY: pdfminer_text_loader,
+        # PLUMBER_KEY: pdfplumber_text_loader,
+        # MINER_KEY: pdfminer_text_loader,
     }
 
     # TODO: Consider LayoutLM (by Microsoft)
     TABLE_LOADERS = {
-        CAMELOT_KEY: camelot_table_loader,
+        # CAMELOT_KEY: camelot_table_loader,
         TABULA_KEY: tabula_table_loader,
         PYPDF2_KEY: pypdf2_table_loader,
-        PLUMBER_KEY: pdfplumber_table_loader,
+        # PLUMBER_KEY: pdfplumber_table_loader,
         REGEX_KEY: regex_table_loader,
         OCR_KEY: ocr_loader,
     }

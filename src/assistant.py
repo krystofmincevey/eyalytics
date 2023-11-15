@@ -109,6 +109,7 @@ while True:
     messages = client.beta.threads.messages.list(
         thread_id=thread.id
     )
+
     print(messages)
     # content = client.files.retrieve_content(file.id)
 

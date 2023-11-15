@@ -1,0 +1,101 @@
+{
+    "data": [
+        {
+            "id": "step_piVEJ7gMoj42Wao4AcFOWKBo",
+            "assistant_id": "asst_mgtDULFvNuCKs6ugaGm0m7aH",
+            "cancelled_at": null,
+            "completed_at": 1700004385,
+            "created_at": 1700004384,
+            "expired_at": null,
+            "failed_at": null,
+            "last_error": null,
+            "metadata": null,
+            "object": "thread.run.step",
+            "run_id": "run_QkDxRsWz8nSw2mOGqgOUjtr6",
+            "status": "completed",
+            "step_details": {
+                "message_creation": {
+                    "message_id": "msg_oedSlNZPddumxaxrtBHLlYnl"
+                },
+                "type": "message_creation"
+            },
+            "thread_id": "thread_gfDH3twnbkHC2UulnoR2r42w",
+            "type": "message_creation",
+            "expires_at": null
+        },
+        {
+            "id": "step_JOMgvYuYsaFgFo89v5bFGhuH",
+            "assistant_id": "asst_mgtDULFvNuCKs6ugaGm0m7aH",
+            "cancelled_at": null,
+            "completed_at": 1700004384,
+            "created_at": 1700004382,
+            "expired_at": null,
+            "failed_at": null,
+            "last_error": null,
+            "metadata": null,
+            "object": "thread.run.step",
+            "run_id": "run_QkDxRsWz8nSw2mOGqgOUjtr6",
+            "status": "completed",
+            "step_details": {
+                "tool_calls": [
+                    {
+                        "id": "call_J7DXuWKCxxn3euz7yLxiFnje",
+                        "code_interpreter": {
+                            "input": "# Retrieve distinct values in the 'Ticker' column\r\ndistinct_tickers = df['Ticker'].unique()\r\ndistinct_tickers.tolist()",
+                            "outputs": [
+                                {
+                                    "logs": "['GOOG', 'META', 'MSFT', 'TSLA', 'JPM']",
+                                    "type": "logs"
+                                }
+                            ]
+                        },
+                        "type": "code_interpreter"
+                    }
+                ],
+                "type": "tool_calls"
+            },
+            "thread_id": "thread_gfDH3twnbkHC2UulnoR2r42w",
+            "type": "tool_calls",
+            "expires_at": null
+        },
+        {
+            "id": "step_sf2ZpTuVJGm56k2Q15t9Wgar",
+            "assistant_id": "asst_mgtDULFvNuCKs6ugaGm0m7aH",
+            "cancelled_at": null,
+            "completed_at": 1700004382,
+            "created_at": 1700004376,
+            "expired_at": null,
+            "failed_at": null,
+            "last_error": null,
+            "metadata": null,
+            "object": "thread.run.step",
+            "run_id": "run_QkDxRsWz8nSw2mOGqgOUjtr6",
+            "status": "completed",
+            "step_details": {
+                "tool_calls": [
+                    {
+                        "id": "call_yNZ65HuMfIL5xswyZSHzF2vj",
+                        "code_interpreter": {
+                            "input": "import pandas as pd\r\n\r\n# Load the CSV data into a DataFrame\r\nfile_path = '/mnt/data/file-Ow2pAtYskARjXlC3nYgufsXD'\r\ndf = pd.read_csv(file_path)\r\n\r\n# Checking the first few lines to ensure data is read correctly\r\ndf.head()",
+                            "outputs": [
+                                {
+                                    "logs": "         Date       Open       High        Low      Close  Adj Close  \\\n0  08/11/2022  89.160004  90.404999  87.650002  88.910004  88.910004   \n1  09/11/2022  88.544998  89.489998  87.360001  87.400002  87.400002   \n2  10/11/2022  92.339996  94.550003  91.650002  94.169998  94.169998   \n3  11/11/2022  94.709999  97.360001  94.160004  96.730003  96.730003   \n4  14/11/2022  95.500000  97.180000  95.112999  96.029999  96.029999   \n\n     Volume Ticker  \n0  30172000   GOOG  \n1  26743900   GOOG  \n2  42371200   GOOG  \n3  30569100   GOOG  \n4  24170100   GOOG  ",
+                                    "type": "logs"
+                                }
+                            ]
+                        },
+                        "type": "code_interpreter"
+                    }
+                ],
+                "type": "tool_calls"
+            },
+            "thread_id": "thread_gfDH3twnbkHC2UulnoR2r42w",
+            "type": "tool_calls",
+            "expires_at": null
+        }
+    ],
+    "object": "list",
+    "first_id": "step_piVEJ7gMoj42Wao4AcFOWKBo",
+    "last_id": "step_sf2ZpTuVJGm56k2Q15t9Wgar",
+    "has_more": false
+}

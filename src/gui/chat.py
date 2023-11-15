@@ -7,7 +7,9 @@ import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
 from typing import List
-from PIL import Image, ImageOps, ImageDraw
+from PIL import Image
+
+from .image import USER_LOGO, ASSISTANT_LOGO
 
 
 CHAT_KEY = 'start_chat'
@@ -17,11 +19,12 @@ ASSISTANT_KEY = 'assistant_id'
 THREAD_KEY = 'thread_id'
 FILE_IDS_KEY = 'file_id_list'
 
-RAG_ASSISTANT_FILE = './data/rag_assistant_id.txt'
-CODE_ASSISTANT_FILE = './data/code_assistant_id.txt'
-ACTIONS_FILE = './data/required_actions.json'
-MESSAGES_FILE = './data/messages.jsom'
-RUN_FILE = './data/run_steps.json'
+RAG_ASSISTANT_FILE = './data/cwyod/rag_assistant_id.txt'
+CODE_ASSISTANT_FILE = './data/cwyod/code_assistant_id.txt'
+ACTIONS_FILE = './data/cwyod/required_actions.json'
+MESSAGES_FILE = './data/cwyod/messages/messages_{0}.json'
+IMAGE_FILE = './data/cwyod/img/image_{0}_{1}.png'
+RUN_FILE = './data/cwyod/run_steps/run_steps_{0}.json'
 MODEL = 'gpt-4-1106-preview'
 
 
@@ -30,22 +33,6 @@ if not os.getenv("OPENAI_API_KEY"):
     raise KeyError(
         "You will need an OPENAI_API_KEY to use the LLM models in this notebook."
     )
-
-
-# Function to create rounded icons
-def create_rounded_icon(path, size=(50, 50)):
-    img = Image.open(path).resize(size, Image.ANTIALIAS)
-    mask = Image.new('L', img.size, 0)
-    mask_draw = ImageDraw.Draw(mask)
-    mask_draw.ellipse((0, 0) + img.size, fill=255)
-    img_rounded = ImageOps.fit(img, mask.size, centering=(0.5, 0.5))
-    img_rounded.putalpha(mask)
-    return img_rounded
-
-
-# Load and process logos
-user_logo = create_rounded_icon('./img/user_logo.png')
-assistant_logo = create_rounded_icon('./img/ai_logo_2.png')
 
 
 def init_chatbot_session_state():
@@ -64,7 +51,7 @@ def create_rag_assistant(client):
         with open(RAG_ASSISTANT_FILE, 'r') as file:
             assistant_id = file.read().strip()
     else:
-        assistant = client.beta.assistant.create(
+        assistant = client.beta.assistants.create(
             name="RAG Assistant",
             description="Information retriever agent",
             instructions="""
@@ -110,7 +97,7 @@ def create_analyst_assistant(client):  # TODO add info as input in the future
         with open(CODE_ASSISTANT_FILE, 'r') as file:
             assistant_id = file.read().strip()
     else:
-        assistant = client.beta.assistant.create(
+        assistant = client.beta.assistants.create(
             name="Analytics Chatbot",
             instructions="""
             You are tailored to facilitate advanced CSV data analysis and 
@@ -182,7 +169,7 @@ def handle_required_actions(client, thread_id: str, run):
     required_actions = run.required_action.submit_tool_outputs
     with open(ACTIONS_FILE, 'w') as f:
         required_actions_json = required_actions.model_dump()
-        json.sump(required_actions_json, f, indent=4)
+        json.dump(required_actions_json, f, indent=4)
 
     tool_outputs = []
     for action in required_actions.tool_calls:
@@ -205,7 +192,6 @@ def handle_required_actions(client, thread_id: str, run):
     client.beta.threads.runs.sumbit_tool_outputs(
         thread_id=thread_id,
         run_id=run.id,
-
     )
 
 
@@ -214,23 +200,34 @@ def process_response(client, thread_id: str, run):
         thread_id=thread_id
     )
     # save messages
-    with open('messages.json', 'w') as f:
+    with open(MESSAGES_FILE.format(thread_id), 'w') as f:
         messages_json = messages.model_dump()
         json.dump(messages_json, f, indent=4)
+
+    print("In process_responses")
+    print(messages_json)
 
     run_steps = client.beta.threads.runs.steps.list(
         thread_id=thread_id,
         run_id=run.id,
     )
     # save run steps
-    with open(RUN_FILE, 'w') as f:
+    with open(RUN_FILE.format(thread_id), 'w') as f:
         run_steps_json = run_steps.model_dump()
         json.dump(run_steps_json, f, indent=4)
 
     # process message
     image_counter = 0
     updated_messages = []
-    for message in messages.data:
+    assistant_messages_for_run = [
+        message for message in messages
+        if message.run_id == run.id and message.role == "assistant"
+    ]
+    for message in reversed(assistant_messages_for_run):
+
+        print('in messages processing for loop')
+        print(message)
+
         if message.content:
             citations = []
 
@@ -251,116 +248,99 @@ def process_response(client, thread_id: str, run):
                             image_file_id = cited_file.id
                             image_data: bytes = client.files.with_raw_response.retrieve_content(image_file_id).content
                             image = Image.open(io.BytesIO(image_data))
-                            image.save(f'./data/cwyod/img/image_{image_counter}.png')
+                            updated_messages.append({"role": "assistant", "type": "image", "content": image})
+
+                            image.save(IMAGE_FILE.format(image_counter, thread_id))
                             image_counter += 1
 
                     text_value += '\n' + '\n'.join(citations)
+                    updated_messages.append({"role": "assistant", "type": "text", "content": text_value})
+
                     content_part.text.value = text_value
                 elif content_part.type == 'image_file':
                     image_file_id = content_part.image_file.file_id
                     image_data: bytes = client.files.with_raw_response.retrieve_content(image_file_id).content
                     image = Image.open(io.BytesIO(image_data))
-                    image.save(f'./data/cwyod/img/image_{image_counter}.png')
+                    updated_messages.append({"role": "assistant", "type": "image", "content": image})
+
+                    image.save(IMAGE_FILE.format(image_counter, thread_id))
                     image_counter += 1
-            updated_messages.append(message)
 
     return updated_messages
 
 
-def display_message(message):
-    st.write(message["role"].capitalize())
+def display_message(col, message):
     if message["type"] == "text":
-        st.markdown(message["content"])  # Using markdown for more flexibility
+        col.markdown(message["content"], unsafe_allow_html=True)  # Using markdown for more flexibility
     elif message["type"] == "image":
-        st.image(message["content"])
+        col.image(message["content"])
 
 
 def chat():
-    # Display existing messages in the chat
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    client = st.session_state[CLIENT_KEY]
+    assistant_id = st.session_state[ASSISTANT_KEY]
+    thread_id = st.session_state[THREAD_KEY]
 
-    # Display chat messages
-    for message in st.session_state.messages:
+    # Display existing messages in the chat
+    # Group messages by consecutive roles
+    grouped_messages = []
+    for message in reversed(st.session_state.messages):
+        if not grouped_messages or message["role"] != grouped_messages[-1][0]["role"]:
+            grouped_messages.append([message])
+        else:
+            grouped_messages[-1].append(message)
+
+    print("grouped messages")
+    print(grouped_messages)
+
+    # Display grouped messages
+    for group in grouped_messages:
         with st.container():
-            st.write(message["role"].capitalize())
-            if message["type"] == "text":
-                st.text(message["content"])
-            elif message["type"] == "image":
-                st.image(message["content"])
+            col1, col2 = st.columns([1, 5])  # Adjust the ratio as needed
+
+            # Display the logo for the first message in the group
+            if group[0]["role"] == "assistant":
+                col1.image(ASSISTANT_LOGO, width=30)
+            elif group[0]["role"] == "user":
+                col1.image(USER_LOGO, width=30)
+
+            # Display all messages in the group
+            for message in group:
+                print('Message in grouped_messages')
+                print(message)
+                display_message(col2, message)
 
     # Chat input for the user
-    if prompt := st.chat_input("What is up?"):
+    # if prompt := st.chat_input("Message BelfiusGPT..."):
+
+    # User input text box
+    prompt = st.text_input("Message ChatGPT...", key="input")
+
+    # Send button
+    if st.button("Send"):
         # Add user message to the state and display it
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # Add the user's message to the existing thread
-        client.beta.threads.messages.create(
-            thread_id=st.session_state.thread_id,
-            role="user",
-            content=prompt
+        message = {"role": "user", "type": "text", "content": prompt}
+        st.session_state[MESSAGES_KEY].append(
+            message
         )
+        with st.container():
+            col1, col2 = st.columns([1, 5])  # Adjust the ratio as needed
+            col1.image(USER_LOGO, width=30)  # Smaller width for icons
+            display_message(col2, message)
 
-        # Create a run with additional instructions
-        run = client.beta.threads.runs.create(
-            thread_id=st.session_state.thread_id,
-            assistant_id=assistant_id,
-            instructions="Please answer the queries using the knowledge provided in the files.When adding other information mark it clearly as such.with a different color"
+        run = send_message_and_run_assistant(
+            client, thread_id=thread_id,
+            assistant_id=assistant_id, user_message=prompt
         )
+        run = poll_run_status(client, thread_id=thread_id, run=run)
+        messages = process_response(client, thread_id=thread_id, run=run)
+        st.session_state[MESSAGES_KEY].extend(messages)
 
-        # Poll for the run to complete and retrieve the assistant's messages
-        while run.status != 'completed':
-            time.sleep(1)
-            run = client.beta.threads.runs.retrieve(
-                thread_id=st.session_state.thread_id,
-                run_id=run.id
-            )
-
-        # Retrieve messages added by the assistant
-        messages = client.beta.threads.messages.list(
-            thread_id=st.session_state.thread_id
-        )
-
-        # Process and display assistant messages
-        assistant_messages_for_run = [
-            message for message in messages
-            if message.run_id == run.id and message.role == "assistant"
-        ]
-        for message in assistant_messages_for_run:
-            full_response = process_message_with_citations(message)
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
-            with st.chat_message("assistant"):
-                st.markdown(full_response, unsafe_allow_html=True)
-
-
-def process_message_with_citations(message):
-    """Extract content and annotations from the message and format citations as footnotes."""
-    message_content = message.content[0].text
-    annotations = message_content.annotations if hasattr(message_content, 'annotations') else []
-    citations = []
-
-    # Iterate over the annotations and add footnotes
-    for index, annotation in enumerate(annotations):
-        # Replace the text with a footnote
-        message_content.value = message_content.value.replace(annotation.text, f' [{index + 1}]')
-
-        # Gather citations based on annotation attributes
-        if (file_citation := getattr(annotation, 'file_citation', None)):
-            # Retrieve the cited file details (dummy response here since we can't call OpenAI)
-            cited_file = {'filename': 'cited_document.pdf'}  # This should be replaced with actual file retrieval
-            citations.append(f'[{index + 1}] {file_citation.quote} from {cited_file["filename"]}')
-        elif (file_path := getattr(annotation, 'file_path', None)):
-            # Placeholder for file download citation
-            cited_file = {'filename': 'downloaded_document.pdf'}  # This should be replaced with actual file retrieval
-            citations.append(f'[{index + 1}] Click [here](#) to download {cited_file["filename"]}')  # The download link should be replaced with the actual download path
-
-    # Add footnotes to the end of the message content
-    full_response = message_content.value + '\n\n' + '\n'.join(citations)
-    return full_response
-
+        with st.container():
+            col1, col2 = st.columns([1, 5])  # Adjust the ratio as needed
+            col1.image(ASSISTANT_LOGO, width=30)  # Smaller width for icons
+            for message in messages:
+                display_message(col2, message)
 
 # SUDO CODE:
 # get_client()

@@ -1,0 +1,14 @@
+Table showing the Scope 1, 2, and 3 emissions of various companies to which Belfius' has exposure.
+| Column Name | Description |
+| asset_class | The type of loan (e.g., bonds) |
+| entity      | The entity associated with the loan (e.g., Bank, Belins) |
+| nace_code   | The NACE code associated with the economic activity of the borrower |
+| company_name| The name of the company receiving the loan |
+| actor_id    | The unique identifier (ID) of the company providing the loan |
+| dq_score    | The data quality score for the calculation method of the financed emissions |
+| outstanding_amount_euros | The outstanding amount of the loan in euros |
+| scope_1_emissions_ktons | The financed scope 1 emissions in kilotons related to the loan |
+| scope_2_emissions_ktons | The financed scope 2 emissions in kilotons related to the loan |
+| scope_3_emissions_ktons | The financed scope 3 emissions in kilotons related to the loan |
+| engine_version | The version of the data processing engine |
+| date_ing    | The date of data ingestion |

@@ -97,15 +97,18 @@ if submit:
 # Define the custom style
 custom_title = """
 <div style="
-    font-size: 60px;
-    font-weight: bold;
-    color: white; /* Belfius red */
-    text-shadow: 
-        2px 2px 2px #555; /* subtle shadow for depth */
-    font-family: 'Open Sans', sans-serif; /* sleek, modern font */
-    text-align: center; /* Center aligns the text */
+    text-align: center; /* Horizontally center the content */
+    width: 100%; /* Ensure the div takes up the full width */
 ">
-    {0}
+    <div style="
+        font-size: 60px;
+        font-weight: bold;
+        color: white; /* Belfius red */
+        text-shadow: 2px 2px 2px #555; /* subtle shadow for depth */
+        font-family: 'Open Sans', sans-serif; /* sleek, modern font */
+    ">
+        {0}
+    </div>
 </div>
 """
 
@@ -124,7 +127,7 @@ if 'allowed_datasets' in st.session_state:
         st.markdown(custom_title.format('BelfiusGPT+'), unsafe_allow_html=True)
         create_upload_buttons()
 
-if st.session_state.get(DATASET_KEY) and not st.session_state[DATASET_KEY].empty:
+if st.session_state.get(DATASET_KEY) is not None and not st.session_state[DATASET_KEY].empty:
     display_dataset()
 
 if st.session_state.get(CHAT_KEY) and st.session_state[CHAT_KEY]:
@@ -138,5 +141,3 @@ if st.session_state.get(CHAT_KEY) and st.session_state[CHAT_KEY]:
 #
 # # Display the chat log
 # display_chat_log()
-
-

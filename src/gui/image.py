@@ -1,7 +1,23 @@
 import base64
 import streamlit as st
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageOps
+
+
+# Function to create rounded icons
+def create_rounded_icon(path, size=(60, 60)):
+    img = Image.open(path).resize(size)
+    mask = Image.new('L', img.size, 0)
+    mask_draw = ImageDraw.Draw(mask)
+    mask_draw.ellipse((0, 0) + img.size, fill=255)
+    img_rounded = ImageOps.fit(img, mask.size, centering=(0.5, 0.5))
+    img_rounded.putalpha(mask)
+    return img_rounded
+
+
+# Load and process logos
+USER_LOGO = create_rounded_icon('./img/user_logo.jpg')
+ASSISTANT_LOGO = create_rounded_icon('./img/ai_logo_2.jpg')
 
 
 # Function to set the logo in the sidebar
